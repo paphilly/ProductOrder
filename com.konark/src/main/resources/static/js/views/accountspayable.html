@@ -1,0 +1,252 @@
+<img data-bind='visible: loadingStatus.isBusy()' class="loading-img" style="width: 9em;" src="./css/images/loading.gif"/>
+<oj-bind-if test="[[loadingStatus.isLoaded()]]">
+    <div class="oj-flex oj-panel kn-oj-panel-border2px">
+        <div class="oj-flex-item oj-sm-12 oj-md-7 oj-lg-7">
+
+            <div class="oj-flex">
+                <div class="oj-flex-item oj-sm-12 oj-md-6 oj-lg-6">
+                    <div class="oj-sm-padding-1x-bottom  oj-typography-semi-bold">Location</div>
+                    <oj-bind-if test="[[refreshLocationfilter]]">
+                        <oj-select-many id="select"
+                                        value="{{locationSelectValue}}"
+                                        options="[[locationDP]]"
+                                        placeholder="Select location to load its data"
+                                        on-value-changed="{{locationValueActionHandler}}"
+                                        style="max-width: 40em;">
+                        </oj-select-many>
+                    </oj-bind-if>
+                </div>
+
+                <div class="oj-flex-item oj-sm-12 oj-md-6 oj-lg-6">
+                    <oj-bind-if test="[[locationSelected]]">
+                        <div class="oj-sm-padding-1x-bottom  oj-typography-semi-bold">Vendor</div>
+                        <oj-select-single id="locationselectid"
+                                          class = "kn-dropdown-icon-color"
+                                          data="[[vendorDP]]"
+                                          placeholder="Select a Vendor from the list..."
+                                          on-oj-value-action="[[vendorValueActionHandler]]"
+                                          value="{{vendorSelectValue}}"
+                                          style="max-width: 40em;">
+                        </oj-select-single>
+                    </oj-bind-if>
+                </div>
+
+
+                <div class="oj-flex-item oj-sm-12 oj-md-12 oj-lg-12 oj-sm-padding-2x-start oj-sm-padding-2x-top oj-sm-padding-2x-end">
+                    <oj-bind-if test="[[locationSelected && showBillStatus]]">
+                        <div class="oj-sm-padding-1x-bottom  oj-typography-semi-bold">Bill Status</div>
+                        <oj-select-many id="select" value="{{statusSelectValue}}"
+                                        options="[[statusDP]]"
+                                        placeholder="Filter by status"
+                                        on-value-changed="[[statusValueActionHandler]]"
+                                        style="max-width: 50em;">
+                        </oj-select-many>
+                    </oj-bind-if>
+
+                    <oj-bind-if test="[[accountsPayableTableShow]]">
+                        <div class="oj-sm-padding-1x-bottom  oj-typography-semi-bold" style="float: right;padding-right: 20px;padding-top:10px; ">Total Bills :
+                            <oj-bind-text value="[[accountsPayableTableDataProvider().data.length]]"></oj-bind-text>
+                        </div>
+                    </oj-bind-if>
+
+                    <oj-bind-if test="[[accountsPayableTableLoading]]">
+                        <img class="product-loading-img" style="width: 5em;" src="./css/images/loading.gif"/>
+                    </oj-bind-if>
+                    <oj-bind-if test="[[accountsPayableTableShow]]">
+                        <oj-table id='accountpayable-table' aria-label='Accounts Payable Table'
+                                  class=" oj-bg-brand-10"
+                                  data='[[accountsPayableTableDataProvider]]'
+                                  selection-mode='{"row": "single"}'
+                                  scroll-policy='loadMoreOnScroll'
+                                  on-selected-changed='{{accountsPayableTableSelectionListener}}'
+                                  display='grid'
+                                  style='max-width: 100%; max-height : 700px'
+                                  columns='[
+                         {"headerText": "Vendor",
+                        "field": "vendorName",
+                        "resizable": "enabled",
+                        "headerClassName": "kn-table-header-class",
+                        "headerStyle": "color : black;font-size: 1em;font-weight: 600; width: 50em;"},
+
+                        {"headerText": "Bill Number",
+                        "field": "billNumber",
+                        "resizable": "enabled",
+                        "headerClassName": "kn-table-header-class",
+                        "headerStyle": "color : black;font-size: 1em;font-weight: 600; width: 20em; text-align: center;"},
+
+                         {"headerText": "Bill Date",
+                        "field": "billDate",
+                        "resizable": "enabled",
+                        "headerClassName": " kn-table-header-class",
+                       "headerStyle": "color : black;font-size: 1em;font-weight: 600; width: 20em; text-align: center;"},
+
+                       {"headerText": "Balance",
+                        "field": "balance",
+                        "resizable": "enabled",
+                        "headerClassName": "kn-table-header-class",
+                        "headerStyle": "color : black;font-size: 1em;font-weight: 600; width: 20em; text-align: center;"},
+
+                         {"headerText": "Status",
+                        "field": "status",
+                        "resizable": "enabled",
+                        "headerClassName": " kn-table-header-class",
+                          "headerStyle": "color : black;font-size: 1em;font-weight: 600; width: 20em; text-align: center; "} ]'>
+                            <template slot='rowTemplate' data-oj-as='row'>
+                                <tr>
+                                    <td> <oj-bind-text value="[[row.data.vendorName]]"></oj-bind-text> </td>
+                                    <td  style="text-align: center;"> <oj-bind-text value="[[row.data.billNumber]]"></oj-bind-text> </td>
+                                    <td  style="text-align: center;"> <oj-bind-text value="[[row.data.billDate]]"></oj-bind-text> </td>
+                                    <td  style="text-align: center;"> <oj-bind-text value="[[row.data.balance]]"></oj-bind-text> </td>
+
+                                    <oj-bind-if test="[[row.data.status === 'Overdue' ]]">
+                                        <td style="text-align: center;" >
+                                            <span style="font-size: 12px;" class="oj-badge oj-badge-xl oj-badge-danger "><oj-bind-text   value="[[row.data.status]]"></oj-bind-text></span>
+                                        </td>
+                                    </oj-bind-if>
+                                    <oj-bind-if test="[[row.data.status === 'Pending' ]]">
+                                        <td style="text-align: center;" >
+                                            <span style="font-size: 12px;" class="oj-badge oj-badge-xl oj-badge-warning "><oj-bind-text   value="[[row.data.status]]"></oj-bind-text></span>
+                                        </td>
+                                    </oj-bind-if>
+
+                                    <oj-bind-if test="[[row.data.status === 'Approved']]">
+                                        <td style="text-align: center;" >
+                                            <span style="font-size: 12px;" class="oj-badge oj-badge-xl oj-badge-approved "><oj-bind-text   value="[[row.data.status]]"></oj-bind-text></span>
+                                        </td>
+                                    </oj-bind-if>
+
+                                    <oj-bind-if test="[[row.data.status === 'Paid']]">
+                                        <td style="text-align: center;" >
+                                            <span style="font-size: 12px;" class="oj-badge oj-badge-xl oj-badge-success "><oj-bind-text   value="[[row.data.status]]"></oj-bind-text></span>
+                                        </td>
+                                    </oj-bind-if>
+
+                                    <oj-bind-if test="[[row.data.status === 'Notified']]">
+                                        <td style="text-align: center;" >
+                                            <span style="font-size: 12px;" class="oj-badge oj-badge-xl oj-badge-info "><oj-bind-text   value="[[row.data.status]]"></oj-bind-text></span>
+                                        </td>
+                                    </oj-bind-if>
+                                </tr>
+                            </template>
+                        </oj-table>
+                    </oj-bind-if>
+
+                </div>
+            </div>
+        </div>
+
+
+
+        <oj-bind-if test="[[showBillDetails() && accountsPayableSelectedData()]]">
+            <div class="oj-panel oj-flex-item oj-sm-12 oj-md-5 oj-lg-5 oj-sm-padding-2x-start oj-sm-padding-2x-top oj-sm-padding-2x-end">
+                <div class="oj-text-color-primary oj-typography-subheading-sm" style="background: #d2e099; padding: 7px; border-radius: 4px;"> Bill Details & Actions </div>
+                <div class="oj-flex" style="font-size:13px">
+
+
+                    <div class="oj-flex-item oj-sm-12 oj-md-6 oj-lg-6 oj-sm-padding-1x-start oj-sm-padding-2x-top oj-sm-padding-2x-end">
+                        <div class="oj-text-color-primary oj-typography-semi-bold"> Total Amount :  </div>
+                        <oj-bind-text value="[['$ ' +  accountsPayableSelectedData().totalAmount]]"></oj-bind-text>
+                    </div>
+                    <div class="oj-flex-item oj-sm-12 oj-md-6 oj-lg-6 oj-sm-padding-1x-start  oj-sm-padding-2x-end">
+                        <div class="oj-sm-padding-2x-top oj-text-color-primary oj-typography-semi-bold"> Total balance : </div>
+                        <oj-bind-text value="[['$ ' + accountsPayableSelectedData().balance]]"></oj-bind-text>
+                    </div>
+                    <div class="oj-flex-item oj-sm-12 oj-md-6 oj-lg-6 oj-sm-padding-1x-start oj-sm-padding-2x-end">
+
+                        <div class="oj-sm-padding-2x-top oj-sm-padding-1x-bottom oj-text-color-primary oj-typography-semi-bold"> Current Status :  </div>
+                        <oj-bind-if test="[[accountsPayableSelectedData().status === 'Approved']]">
+                            <span style="font-size: 12px;" class="oj-badge oj-badge-xl oj-badge-approved "><oj-bind-text   value="[[accountsPayableSelectedData().status]]"></oj-bind-text></span>
+                        </oj-bind-if>
+                        <oj-bind-if test="[[accountsPayableSelectedData().status === 'Overdue']]">
+                            <span style="font-size: 12px;" class="oj-badge oj-badge-xl oj-badge-danger "><oj-bind-text   value="[[accountsPayableSelectedData().status]]"></oj-bind-text></span>
+                        </oj-bind-if>
+                        <oj-bind-if test="[[accountsPayableSelectedData().status === 'Pending']]">
+                            <span style="font-size: 12px;" class="oj-badge oj-badge-xl oj-badge-warning "><oj-bind-text   value="[[accountsPayableSelectedData().status]]"></oj-bind-text></span>
+                        </oj-bind-if>
+                        <oj-bind-if test="[[accountsPayableSelectedData().status === 'Paid']]">
+                            <span style="font-size: 12px;" class="oj-badge oj-badge-xl oj-badge-success "><oj-bind-text   value="[[accountsPayableSelectedData().status]]"></oj-bind-text></span>
+                        </oj-bind-if>
+                        <oj-bind-if test="[[accountsPayableSelectedData().status === 'Notified']]">
+                            <span style="font-size: 12px;" class="oj-badge oj-badge-xl oj-badge-info "><oj-bind-text   value="[[accountsPayableSelectedData().status]]"></oj-bind-text></span>
+                        </oj-bind-if>
+                    </div>
+
+                    <div class="oj-flex-item oj-sm-12 oj-md-6 oj-lg-6 oj-sm-padding-1x-start  oj-sm-padding-2x-end">
+                        <div class="oj-sm-padding-2x-top oj-text-color-primary oj-typography-semi-bold"> Due Date :  </div>
+                        <oj-bind-text value="[[accountsPayableSelectedData().dueDate]]"></oj-bind-text>
+                    </div>
+
+
+                    <div class="oj-flex oj-sm-padding-4x-top">
+
+                        <oj-bind-if test="[[approveActionInProgress()]]">
+                            <img class="accountspayable-loading-img" src="./css/images/loading.gif"/>
+                        </oj-bind-if>
+
+
+                        <div :class="[[disabledClass]]" class="oj-flex-item oj-sm-12 oj-md-6 oj-lg-6 oj-sm-padding-1x-start oj-sm-padding-2x-top oj-sm-padding-4x-end">
+
+                            <div class="oj-sm-padding-2x-top oj-typography-semi-bold" style="">Comments :</div>
+                            <oj-text-area id="comment-id" placeholder="Comments if any.."  value="{{accountsPayableSelectedData().comment}}"  max-rows="2" rows= "2" length.max="500" length.counter="remaining"   resize-behavior="vertical" style ="width: 50em">  </oj-text-area>
+
+                            <oj-bind-if test="[[ accountsPayableSelectedData().status === 'Pending' || accountsPayableSelectedData().status === 'Overdue']]">
+                                <div class="oj-sm-padding-2x-top">
+                                    <oj-button id="approve-buttonid" :buttonType=[["Approved"]] class="approve-button oj-button-lg" chroming="callToAction" on-oj-action="[[approveAction]]">
+                                        Approve
+                                    </oj-button>
+                                </div>
+                            </oj-bind-if>
+                            <oj-bind-if test="[[ accountsPayableSelectedData().status === 'Approved'  ]]">
+                                <div class="oj-sm-padding-2x-top">
+
+                                    <oj-button id="pending-buttonid" :buttonType=[["Pending"]] class="pending-button oj-sm-margin-2x-top oj-sm-margin-2x-bottom oj-button-lg" chroming="callToAction" on-oj-action="[[approveAction]]">
+                                        Pending
+                                    </oj-button>
+                                    <oj-button id="paid-buttonid" :buttonType=[["Paid"]] class="paid-button oj-sm-margin-2x-top oj-sm-margin-2x-bottom oj-button-lg" chroming="callToAction" on-oj-action="[[approveAction]]">
+                                        Paid
+                                    </oj-button>
+                                </div>
+                            </oj-bind-if>
+
+                            <oj-bind-if test="[[ accountsPayableSelectedData().status === 'Paid' || accountsPayableSelectedData().status === 'Notified'  ]]">
+                                <div class="oj-sm-padding-2x-top">
+                                    <oj-button id="notify-buttonid" :buttonType=[["Notified"]] class="notified-button oj-sm-margin-2x-top oj-sm-margin-2x-bottom oj-button-lg" chroming="callToAction" on-oj-action="[[approveAction]]">
+                                        Notify
+                                    </oj-button>
+                                </div>
+                            </oj-bind-if>
+
+                        </div>
+                        <div :class="[[disabledClass]]" class="oj-flex-item oj-sm-12 oj-md-6 oj-lg-6 oj-sm-padding-1x-start oj-sm-padding-2x-top oj-sm-padding-2x-end">
+                            <div class="oj-sm-padding-2x-top oj-typography-semi-bold" style="">Override Due Date :</div>
+                            <oj-input-date id="override-duedate" placeholder="Pick a date..." value="{{accountsPayableSelectedData().overrideDueDate}}"
+                                           disabled = "[[accountsPayableSelectedData().status === 'Notified' ? true : false]]"  style="max-width: 25em"></oj-input-date>
+                            <br>
+
+                            <div class="oj-sm-padding-2x-top oj-typography-semi-bold" style="">Reason to override due date :</div>
+                            <oj-text-area id="comment-id" placeholder="Override due date reason.."  value="{{accountsPayableSelectedData().comment}}"
+                                          disabled = "[[accountsPayableSelectedData().status === 'Notified' ? true : false]]"  max-rows="2" rows= "2" length.max="500" length.counter="remaining"   resize-behavior="vertical" style ="width: 50em">  </oj-text-area>
+
+
+                            <oj-button id="approve-buttonid" :buttonType=[[accountsPayableSelectedData().status]] class="oj-sm-margin-2x-top oj-sm-margin-2x-bottom oj-button-lg" chroming="callToAction"
+                                       disabled = "[[accountsPayableSelectedData().status === 'Notified' ? true : false]]"  on-oj-action="[[approveAction]]">
+                                Save Date & Comments
+                            </oj-button>
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+
+
+
+
+
+            </div>
+        </oj-bind-if>
+
+    </div>
+    </div>
+</oj-bind-if>

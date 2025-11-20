@@ -1,0 +1,98 @@
+<img data-bind='visible: loadingStatus.isBusy()' class="loading-img" style="width: 9em;" src="./css/images/loading.gif"/>
+<oj-bind-if test="[[loadingStatus.isLoaded()]]">
+    <div class="oj-panel kn-oj-panel-border2px">
+        <div class="oj-flex">
+            <div class="oj-flex-item oj-sm-12 oj-md-3 oj-lg-3 oj-sm-padding-1x-start oj-sm-padding-2x-top oj-sm-padding-2x-end">
+                <div class="oj-text-color-primary oj-typography-semi-bold"> Phone Number :  </div>
+                <oj-input-text id="phnumid" placeholder = "Enter Phone Number"  messages-custom="{{invalidPhoneMsg}}" value="{{phoneNumber}}"   ></oj-input-text>
+            </div>
+            <div class="oj-flex-item oj-sm-12 oj-md-3 oj-lg-3 oj-sm-padding-1x-start oj-sm-padding-2x-top oj-sm-padding-2x-end">
+                <div class="oj-text-color-primary oj-typography-semi-bold"> Gift Card Number :  </div>
+                <oj-input-text id="giftCardNum" placeholder = "Enter Gift Card Number" messages-custom="{{invalidNumberMsg}}" value="{{giftCardNumber}}"></oj-input-text>
+            </div>
+            <div class="oj-flex-item oj-sm-12 oj-md-12 oj-lg-12 oj-sm-padding-1x-start oj-sm-padding-2x-top oj-sm-padding-2x-end">
+                <oj-button id="sumbit-buttonid"   class="notified-button oj-sm-margin-2x-top oj-sm-margin-2x-bottom oj-button-lg" chroming="callToAction" on-oj-action="[[submitGiftCard]]">
+                    Sumbit
+                </oj-button>
+            </div>
+        </div>
+        <!--Gift card details from here-->
+        <oj-bind-if test="[[giftCardDetailsLoading]]">
+            <img class="accountspayable-loading-img" src="./css/images/loading.gif"/>
+        </oj-bind-if>
+        <oj-bind-if test="[[giftCardDetailsLoaded]]">
+            <div class="oj-flex">
+                <div class="oj-flex-item oj-sm-12 oj-md-8 oj-lg-8 oj-sm-padding-1x-start oj-sm-padding-2x-top oj-sm-padding-2x-end">
+
+                           <span style="font-size: 1.3em;" data-bind="text: 'Firstname : ' " > </span>
+                           <span class="oj-sm-padding-7x-end" style="font-size: 1.3em;" >  <oj-bind-text  value="[[giftCardModel().firstName]]"></oj-bind-text> </span>
+
+                          <span class="" style="font-size: 1.3em;" data-bind="text: 'Lastname : ' " > </span>
+                          <span class="oj-sm-padding-7x-end" style="font-size: 1.3em;" >  <oj-bind-text value="[[giftCardModel().lastName]]"></oj-bind-text>  </span>
+
+                    <span class="" style="font-size: 1.3em;" data-bind="text: 'Balance : ' " > </span>
+                    <span class="" style=" color : green;font-size: 1.3em;font-weight: 600;"  data-bind="text: ' $' " > </span>
+                    <span style=" color : green;font-size: 1.3em;font-weight: 600;">  <oj-bind-text value="[[ giftCardModel().balance ?  giftCardModel().balance : '0']]"></oj-bind-text>   </span>
+
+
+
+                </div>
+                <div class="oj-flex-item oj-sm-12 oj-md-8 oj-lg-8 oj-sm-padding-1x-start oj-sm-padding-2x-top oj-sm-padding-2x-end">
+                    <oj-table id='giftcard-transactions-table' aria-label='Gift Card Table'
+                              class=" oj-bg-brand-10"
+                              data='[[giftCardTransactionsDP]]'
+                              selection-mode='{"row": "single"}'
+                              scroll-policy='loadMoreOnScroll'
+                              display='grid'
+                              style='max-width: 100%; max-height : 700px'
+                              columns='[
+                  {"headerText": "Amount",
+                  "field": "Amount",
+                  "resizable": "enabled",
+                  "headerClassName": "kn-table-header-class",
+                  "headerStyle": "color : black;font-size: 1em;font-weight: 600; width: 20em;"},
+                  {"headerText": "Invoice Number",
+                  "field": "InvoiceNumber",
+                  "resizable": "enabled",
+                  "headerClassName": "kn-table-header-class",
+                  "headerStyle": "color : black;font-size: 1em;font-weight: 600; width: 20em; text-align: center;"},
+                  {"headerText": "Store",
+                  "field": "Store",
+                  "resizable": "enabled",
+                  "headerClassName": " kn-table-header-class",
+                  "headerStyle": "color : black;font-size: 1em;font-weight: 600; width: 20em; text-align: center;"},
+                  {"headerText": "Transaction Date",
+                  "field": "transDate",
+                  "resizable": "enabled",
+                  "headerClassName": "kn-table-header-class",
+                  "headerStyle": "color : black;font-size: 1em;font-weight: 600; width: 20em; text-align: center;"},
+                  {"headerText": "Transaction Type",
+                  "field": "transType",
+                  "resizable": "enabled",
+                  "headerClassName": " kn-table-header-class",
+                  "headerStyle": "color : black;font-size: 1em;font-weight: 600; width: 20em; text-align: center; "} ]'>
+                        <template slot='rowTemplate' data-oj-as='row'>
+                            <tr>
+                                <td>
+                                    <oj-bind-text value="[[row.data.Amount]]"></oj-bind-text>
+                                </td>
+                                <td  style="text-align: center;">
+                                    <oj-bind-text value="[[row.data.InvoiceNumber]]"></oj-bind-text>
+                                </td>
+                                <td  style="text-align: center;">
+                                    <oj-bind-text value="[[row.data.Store]]"></oj-bind-text>
+                                </td>
+                                <td  style="text-align: center;">
+                                    <oj-bind-text value="[[new Date(row.data.transDate).toGMTString() ]]"></oj-bind-text>
+                                </td>
+                                <td  style="text-align: center;">
+                                    <oj-bind-text value="[[row.data.transType]]"></oj-bind-text>
+                                </td>
+                            </tr>
+                        </template>
+                    </oj-table>
+                </div>
+            </div>
+        </oj-bind-if>
+    </div>
+</oj-bind-if>

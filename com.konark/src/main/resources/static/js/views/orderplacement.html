@@ -1,0 +1,364 @@
+<img data-bind='visible: loadingStatus.isBusy()' class="loading-img" style="width: 9em;" src="./css/images/loading.gif"/>
+<oj-bind-if test="[[loadingStatus.isLoaded()]]">
+    <div class=" oj-panel kn-oj-panel-border2px oj-flex oj-padding-start">
+        <div class="oj-flex-item oj-sm-12 oj-md-8 oj-lg-8 oj-sm-padding-2x-start oj-sm-padding-2x-end">
+            <div class = "">
+                <div class=" oj-flex oj-padding-start">
+                    <div class="oj-flex-item oj-sm-12 oj-md-4 oj-lg-4 oj-sm-padding-2x-start oj-sm-padding-2x-top oj-sm-padding-2x-end">
+                        <div class="oj-sm-padding-1x-bottom  oj-typography-semi-bold">Store</div>
+                        <oj-select-single class = "kn-dropdown-icon-color" slot="value" id="storeid"
+                                          data="[[storeDP]]" 
+                                          on-oj-value-action="[[storeValueActionHandler]]"
+                                          placeholder="Select a Store from the list..."
+                                          value="{{storeSelectValue}}"
+                                          style="max-width: 26em;">
+                        </oj-select-single>
+                    </div>
+                    <oj-bind-if test="[[isProductTableLoad()  ]]">
+                        <div class=" oj-flex-item oj-sm-12 oj-md-3 oj-lg-3 oj-sm-padding-2x-start oj-sm-padding-2x-top oj-sm-padding-2x-end">
+                            <div class=" oj-sm-padding-2x-bottom  oj-typography-semi-bold" >All Products</div>
+                            <label class="switch">
+                                <input type="checkbox" checked value="true" data-bind="checked: showAllProductsSwitchValue, attr: { disabled: isReviewOrder()  }"  >
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                        <div class=" oj-flex-item oj-sm-12 oj-md-3 oj-lg-3 oj-sm-padding-2x-start oj-sm-padding-2x-top oj-sm-padding-2x-end">
+                            <div class="oj-sm-padding-2x-bottom  oj-typography-semi-bold">Store Inventory  </div>
+                            <label class="switch">
+                                <input type="checkbox" checked value="true" data-bind="checked: storeInventorySwitchValue, attr: { disabled: isReviewOrder()  }" >
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                        <div class=" oj-flex-item oj-sm-12 oj-md-2 oj-lg-2 oj-sm-padding-2x-start oj-sm-padding-2x-top oj-sm-padding-2x-end">
+                            <div class=" oj-sm-padding-1x-bottom  oj-typography-semi-bold" style="">Order Total :   </div>
+                            <span style=" color : green;font-size: 1.5em;font-weight: 600;"  data-bind="text: '$' + orderTotalValue()"></span>
+                        </div>
+                    </oj-bind-if>
+                </div>
+                <div class=" oj-flex oj-padding-start">
+                    <div class=" oj-flex-item oj-sm-12 oj-md-4 oj-lg-4 oj-sm-padding-2x-start oj-sm-padding-2x-top oj-sm-padding-2x-end">
+                        <div class="oj-sm-padding-1x-bottom  oj-typography-semi-bold">Vendor</div>
+                        <oj-select-single id="vendorselectid"
+                                          class = "kn-dropdown-icon-color"
+                                          data="[[vendorDP]]"
+                                          placeholder="Select a Vendor from the list..."
+                                          on-oj-value-action="[[vendorValueActionHandler]]"
+                                          value="{{vendorSelectValue}}"
+                                          style="max-width: 26em;">
+                        </oj-select-single>
+                    </div>
+                    <div class="oj-flex-item oj-sm-12 oj-md-8 oj-lg-8 oj-sm-padding-2x-start oj-sm-padding-2x-top oj-sm-padding-2x-end">
+                        <oj-bind-if test="[[isProductTableLoad]]">
+                            <div class=" oj-flex oj-padding-start">
+                                <div class="oj-sm-padding-1x-bottom  oj-typography-semi-bold">Select Department</div>
+                                <oj-select-many id="deptid"
+                                                placeholder="Select Departments from the list..."
+                                                value="{{deptSelectValue}}"
+                                                options="[[deptSelectManyDP]]"
+                                                on-value-changed='{{deptChangeHandler}}'
+                                                class=""
+                                                disabled = "{{isReviewOrder}}"
+                                                style="width: 195em;">
+                                </oj-select-many>
+                            </div>
+                        </oj-bind-if>
+                    </div>
+                </div>
+            </div>
+            <oj-bind-if test="[[ isProductTableLoadisBusy()]]">
+                <div class=" oj-flex oj-padding-start">
+                    <div class="oj-flex-item oj-sm-12 oj-md-4 oj-lg-4">
+                    </div>
+                    <div class="oj-flex-item oj-sm-12 oj-md-8 oj-lg-8">
+                      <!--  <img style = "margin-top : 1em; margin-bottom : 1em;" src="./css/images/loading_small.gif"/>
+                        <img style = "margin-top : 1em; margin-bottom : 1em;" src="./css/images/loading_small.gif"/>
+ -->
+<!--
+                        <oj-progress-bar id="progressCircle" size='md'  value="{{progressValue}}" style = "margin-top : 2em; margin-bottom : 2em;  width: 22.5rem;  "> </oj-progress-bar>
+-->
+                        <img style = "margin-top : 1em; margin-bottom : 1em; width: 6em"  src="./css/images/loading.gif"/>
+
+
+                    </div>
+                </div>
+            </oj-bind-if>
+            <div class = "">
+                <oj-bind-if test="[[isProductTableLoad()   ]]">
+                    <div class=" oj-flex oj-padding-start">
+                        <div class="oj-flex-item oj-sm-12 oj-md-12 oj-lg-12 oj-sm-padding-2x-start oj-sm-padding-2x-top oj-sm-padding-2x-end">
+                            <div class = "oj-sm-padding-2x-top">
+                                <oj-input-search id="productsearchid"
+                                                 value="{{searchValue}}"
+                                                 raw-value="{{searchRawValue}}"
+                                                 suggestions="[[searchSuggestionsDP]]"
+                                                 on-oj-value-action="[[handleSearchValueAction]]"
+                                                 placeholder="Type Product to filter"
+                                                  >
+                                </oj-input-search>
+                            </div>
+                        </div>
+                        <div class="oj-flex-item oj-sm-12 oj-md-12 oj-lg-12 oj-sm-padding-2x-start oj-sm-padding-2x-top oj-sm-padding-2x-end">
+                            <oj-bind-if test="[[productOrderLoading()]]">
+                                <img class="product-loading-img" src="./css/images/loading_small.gif"/>
+                            </oj-bind-if>
+                            <oj-bind-if test="[[showMessage()]]">
+                                <div id="notificationMessagesEmail">
+                                    <!-- Messages -->
+                               <oj-messages class="" messages="[[messagesDataprovider]]"   display-options.category="none"> </oj-messages>
+                                </div>
+                            </oj-bind-if>
+                            <div class="oj-sm-padding-1x-bottom  oj-typography-semi-bold" style="float: right;padding-right: 10px;">Total Products :
+                            <oj-bind-text value="[[productTableDataprovider.dataProvider.data.length]]"></oj-bind-text>
+                            </div>
+                            <div :class="[[disabledClass]]">
+                                <oj-table id='producttableid' aria-label=' Table'
+                                          class="oj-sm-width-full"
+                                          data='[[productTableDataprovider]]'
+                                          selection-mode='{"row": "single"}'
+                                          scroll-policy='loadMoreOnScroll'
+                                          display='grid'
+                                          columns="[[productTableColumns]]"
+                                          style='width: 99%; max-height : 500px;'>
+                                    <template slot='rowTemplate' data-oj-as='row'>
+                                        <tr>
+                                            <td data-bind="click: function (data) { productTableSelectionListener(row.data.itemNumber) } ">
+                                                <oj-bind-text value="[[row.data.vendorItemName]]"></oj-bind-text>
+
+                                            </td>
+                                            <td style="text-align: center;"  data-bind="click: function (data) { productTableSelectionListener(row.data.itemNumber) }">
+                                                <oj-bind-text value="[[row.data.unitMeasure]]"></oj-bind-text>
+                                            </td>
+                                            <td style="text-align: center;"  data-bind="click: function (data) { productTableSelectionListener(row.data.itemNumber) }">
+                                                <oj-bind-text value="[[row.data.caseCost]]"></oj-bind-text>
+                                            </td>
+                                            <td style="text-align: center;"  >
+                                                <oj-input-number  :id="[[row.data.vendorNumber +   row.data.vendorPartNumber]]"
+                                                                 :itemnumber="[[row.data.itemNumber]]"
+                                                                 min="0" max="100" step="1" value="{{row.data.quantityOrdered}}"
+                                                                 step=1
+                                                                 class="kn-info-color"
+                                                                 on-value-changed='{{orderQuantityUpdateHandler}}'
+                                                                 style='width: 9em; height : 1em; padding-right: 11px;   padding-left: 11px;' >
+                                                </oj-input-number>
+                                            </td>
+                                            <oj-bind-if test="[[storeInventorySwitchValue()]]">
+                                                <td style="text-align: center;"  data-bind="click: function (data) { productTableSelectionListener(row.data.itemNumber) }">
+                                                    <oj-bind-text value="[[row.data.quantityInStock]]"></oj-bind-text>
+                                                </td>
+                                            </oj-bind-if>
+                                        </tr>
+                                    </template>
+                                </oj-table>
+                            </div>
+                            <div style="float: right;">
+                                <oj-bind-if test="[[isReviewOrder() == false]]">
+                                    <oj-button id="revieworder" class="oj-sm-margin-5x-top oj-sm-margin-5x-bottom oj-sm-margin-5x-end oj-button-lg" chroming="callToAction" on-oj-action="[[reviewOrderAction]]">
+                                        Review Order
+                                    </oj-button>
+                                </oj-bind-if>
+                                <oj-bind-if test="[[isReviewOrder() ]]">
+                                    <oj-button id="revieworder"  :class="[[disabledClass]]" class="oj-sm-margin-5x-top oj-sm-margin-5x-bottom oj-sm-margin-5x-end oj-button-lg" chroming="callToAction" on-oj-action="[[updateOrderAction]]">
+                                        Update Order
+                                    </oj-button>
+                                </oj-bind-if>
+                                <oj-bind-if test="[[isReviewOrder() ]]">
+                                    <oj-button id="placeorderbutton"  :class="[[disabledClass]]" class="kn-green-button oj-sm-margin-5x-top oj-sm-margin-5x-bottom oj-sm-margin-5x-end oj-button-lg" chroming="callToAction"
+                                               on-oj-action="[[placeOrderAction]]">
+                                        Place Order
+                                    </oj-button>
+                                </oj-bind-if>
+                            </div>
+                        </div>
+                    </div>
+                </oj-bind-if>
+            </div>
+        </div>
+        <oj-bind-if test="[[showVendorReferenceSection() ]]">
+            <div class="oj-panel kn-oj-panel-border2px kn-border-green oj-flex-item oj-sm-12 oj-md-4 oj-lg-4 oj-sm-padding-2x-start oj-sm-padding-2x-top oj-sm-padding-2x-end">
+                <div class=" oj-flex oj-padding-start">
+                    <div class="oj-flex-item oj-sm-12 oj-md-12 oj-lg-12 oj-sm-padding-2x-start oj-sm-padding-2x-top oj-sm-padding-2x-end" style="height:20em;">
+                        <span class="oj-typography-subheading-sm">Vendor Reference</span>
+                        <oj-bind-if test="[[showVendorReferenceTableLoading() ]]">
+                            <img class="product-loading-img" style="width: 5em;" src="./css/images/loading.gif"/>
+                        </oj-bind-if>
+                        <oj-bind-if test="[[showVendorReferenceTable() ]]">
+                            <oj-table id='product-table' aria-label='Vendor Reference Table'
+                                      class="oj-sm-width-full oj-bg-brand-20"
+                                      data='[[vendorReferenceTableDataProvider]]'
+                                      selection-mode='{"row": "single"}'
+                                      scroll-policy='loadMoreOnScroll'
+                                      display='grid'
+                                      edit-mode='rowEdit'
+                                      style='width: 99%; max-height : 180px'
+                                      columns='[
+                        {
+                        "headerText": "Vendor Name",
+                        "field": "vendorName",
+                        "headerClassName": "oj-sm-only-hide kn-table-header-class",
+                        "className": "oj-sm-only-hide",
+                        "resizable": "enabled",
+                        "headerClassName": "  kn-table-header-class",
+                        "headerStyle": "color : black;font-size: 1em;font-weight: 600; "},
+                        {"headerText": "Item Name",
+                        "field": "cost",
+                        "resizable": "enabled",
+                        "headerClassName": "  kn-table-header-class",
+                        "headerStyle": "color : black;font-size: 1em;font-weight: 600;text-align: center;"
+                        },
+                        {"headerText": "Cost",
+                        "field": "cost",
+                        "resizable": "enabled",
+                        "headerClassName": "  kn-table-header-class",
+                        "headerStyle": "color : black;font-size: 1em;font-weight: 600;"
+                        }
+                         
+                        ]'>
+                                <template slot='rowTemplate' data-oj-as='row'>
+                                    <tr>
+                                        <td >
+                                            <oj-bind-text value="[[row.data.vendorName]]"></oj-bind-text>
+                                        </td>
+                                          <td >
+                                            <oj-bind-text value="[[row.data.itemName]]"></oj-bind-text>
+                                        </td>
+                                        <td style="text-align: center;" >
+                                            <oj-bind-text value="[[row.data.caseCost]]"></oj-bind-text>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </oj-table>
+                        </oj-bind-if>
+                    </div>
+
+
+                    <div class="oj-flex-item oj-sm-12 oj-md-12 oj-lg-12 oj-sm-padding-2x-start oj-sm-padding-2x-top oj-sm-padding-2x-end" style="height:20em;">
+                        <oj-bind-if test="[[salesHistoryTableLoading()]]">
+                            <img class="product-loading-img" style="width: 5em;" src="./css/images/loading.gif"/>
+                        </oj-bind-if>
+                        <span class="oj-typography-subheading-sm">Sales History</span>
+                        <oj-bind-if test="[[salesHistoryTable()]]">
+                            <oj-table id='sales-table' aria-label='Vendor Reference Table'
+                                      class="oj-sm-width-full oj-bg-brand-10"
+                                      data='[[salesHistoryTableDataProvider]]'
+                                      selection-mode='{"row": "single"}'
+                                      scroll-policy='loadMoreOnScroll'
+                                      display='grid'
+                                      edit-mode='rowEdit'
+                                      style='width: 99%; max-height : 200px'
+                                      columns='[
+                         {"headerText": "Vendor Item Name",
+                        "field": "vendorItemName",
+                        "resizable": "enabled",
+                        "headerClassName": "kn-table-header-class-orange",
+                        "headerStyle": "color : black;font-size: 1em;font-weight: 600; ",
+                       "style": "word-wrap:break-word; text-align: center;vertical-align: middle; "},
+                        
+                         {"headerText": "Seven Day",
+                        "field": "sevenDay",
+                        "resizable": "enabled",
+                        "headerClassName": " kn-table-header-class-orange",
+                       "headerStyle": "color : black;font-size: 1em;font-weight: 600; "},
+
+                         {"headerText": "fifteen Day",
+                        "field": "fifteenDay",
+                        "resizable": "enabled",
+                        "headerClassName": " kn-table-header-class-orange",
+                       "headerStyle": "color : black;font-size: 1em;font-weight: 600;  "},
+
+                        {"headerText": "Thirty Day",
+                        "field": "thirtyDay",
+                        "resizable": "enabled",
+                        "headerClassName": "  kn-table-header-class-orange",
+                        "headerStyle": "color : black;font-size: 1em;font-weight: 600; text-align: center;"} ]'>
+                                <template slot='rowTemplate' data-oj-as='row'>
+                                    <tr>
+                                          <td> <oj-bind-text value="[[row.data.vendorItemName]]"></oj-bind-text> <br>
+                                       <oj-bind-text value="[[row.data.itemNumber]]"></oj-bind-text> </td>
+                                        <td> <oj-bind-text value="[[row.data.sevenDay]]"></oj-bind-text> </td>
+                                        <td style="text-align: center;" >
+                                            <oj-bind-text value="[[row.data.fifteenDay]]"></oj-bind-text>
+                                        </td>
+
+                                        <td style="text-align: center;" >
+                                            <oj-bind-text value="[[row.data.thirtyDay]]"></oj-bind-text>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </oj-table>
+                        </oj-bind-if>
+                    </div>
+
+
+
+
+
+
+                    <div class="oj-flex-item oj-sm-12 oj-md-12 oj-lg-12 oj-sm-padding-2x-start oj-sm-padding-2x-top oj-sm-padding-2x-end">
+                        <div class = "oj-sm-padding-2x-top">
+                            <oj-bind-if test="[[showInventoryTableLoading() ]]">
+                                <img class="product-loading-img" style="width: 5em;" src="./css/images/loading.gif"/>
+                            </oj-bind-if>
+                            <oj-bind-if test="[[showInventoryTable() ]]">
+                                <oj-input-search id="inventorysearchid"
+                                                 value="{{inventorySearchValue}}"
+                                                 suggestions="[[searchInventorySuggestionsDP]]"
+                                                 min-length="2"
+                                                 raw-value="{{inventorySearchRawValue}}"
+                                                 on-oj-value-action="[[handleInventorySearchValueAction]]"
+                                                 placeholder="type product for inventory check..."
+                                                 aria-label="type product for inventory check..."
+                                                 style="width: 53em;">
+                                </oj-input-search>
+                            </oj-bind-if>
+                        </div>
+                    </div>
+
+                    <div class="oj-flex-item oj-sm-12 oj-md-12 oj-lg-12 oj-sm-padding-2x-start oj-sm-padding-2x-top oj-sm-padding-2x-end">
+                        <oj-bind-if test="[[showInventoryTable() ]]">
+                            <oj-table id='product-table' aria-label='Vendor Reference Table'
+                                      class="oj-sm-width-full oj-bg-brand-10"
+                                      data='[[inventoryTableDataProvider]]'
+                                      selection-mode='{"row": "single"}'
+                                      scroll-policy='loadMoreOnScroll'
+                                      display='grid'
+                                      edit-mode='rowEdit'
+                                      style='width: 99%; max-height : 250px'
+                                      columns='[           {"headerText": "Item Name",
+                        "field": "ItemName",
+                        "resizable": "enabled",
+                        "headerClassName": "  kn-table-header-class",
+                        "headerStyle": "color : black;font-size: 1em;font-weight: 600;"},
+                        {"headerText": "Inventory",
+                        "field": "Inventory",
+                        "resizable": "enabled",
+                        "headerClassName": "  kn-table-header-class",
+                        "headerStyle": "color : black;font-size: 1em;font-weight: 600; text-align: center;"}]'>
+                                <template slot='rowTemplate' data-oj-as='row'>
+                                    <tr>
+                                        <td >
+                                            <oj-bind-text value="[[row.data.itemName]]"></oj-bind-text>
+                                        </td>
+                                        <td style="text-align: center;" >
+                                            <oj-bind-text value="[[row.data.quantityInStock]]"></oj-bind-text>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </oj-table>
+                        </oj-bind-if>
+                    </div>
+                </div>
+            </div>
+        </oj-bind-if>
+    </div>
+</oj-bind-if>
+<div id="dialogWrapper">
+    <oj-dialog id="underDevDialog" dialog-title="This module under development"
+               on-oj-animate-start='[[dialogStartAnimationListener]]'>
+        <div slot="body">
+            Content still cooking...!
+        </div>
+        <div slot="footer">
+            <oj-button id="okButton"  on-oj-action="[[handleOKClose]]">OK</oj-button>
+        </div>
+    </oj-dialog>
+</div>

@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html>
+<head>
+    <style>
+@page {
+    @top-right {
+        content: "Page " counter(page) " of " counter(pages);
+	    font-family: sans-serif;
+        padding-right: 15px;
+    }
+}
+
+#invoice{
+    padding: 0px;
+}
+
+.invoice {
+    padding: 5px
+}
+
+.invoice table {
+      width: 100%;
+      border: none;
+}
+
+.invoice table td,.invoice table th {
+    padding: 5px;
+}
+
+.invoice table tr:nth-child(even) {
+    background-color: #e5ecc7;
+}
+
+.invoice table th {
+    font-weight: 400;
+    font-size: 14px;
+    background: #e67c3f;
+    text-align: center;
+}
+
+.invoice table .qty,.invoice table .total,.invoice table .unit {
+    text-align: center;
+}
+
+.invoice table .no {
+ text-align: center;
+}
+
+.invoice table tfoot td {
+    background: 0 0;
+    border-bottom: none;
+    white-space: nowrap;
+    text-align: right;
+    padding: 10px 20px;
+    font-size: 1.2em;
+    border: none;
+}
+
+.invoice table tfoot tr:first-child td {
+    border: none;
+}
+
+.invoice table tfoot tr:last-child td {
+    color:  #e67c3f;
+    font-size: 1.3em;
+    font-weight: 500;
+
+}
+
+.invoice table tfoot tr td:first-child {
+    border: none;
+}
+
+.invoice footer {
+    width: 100%;
+    text-align: center;
+    color: #777;
+    padding: 8px 0
+}
+.invoice {
+    font-size: 14px;
+    line-height: 1.4;
+    font-family: sans-serif;
+}
+
+.header-wrapper {
+    width: 100%;
+    overflow: hidden;
+    text-align: center;
+    padding-bottom : 10px;
+}
+.header-left-div {
+    width: 300px;
+    float:left;
+}
+.header-right-div {
+    float: right;
+    padding-top : 5px;
+}
+.badge {
+    padding: 1em;
+    margin-bottom: 2rem;
+    border: 1px solid transparent;
+    border-radius: .5em;
+    color: #155724;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+    font-family: sans-serif;
+}
+
+#three-column-wrapper {
+  width:100%;
+  clear:both;
+}
+#three-column-first {
+  width:33%;
+  float:left;
+}
+#three-column-second {
+   width:33%;
+  float:left;
+}
+#three-column-third {
+  width:33%;
+  float:left;
+}
+
+</style>
+</head>
+<body>
+
+        <div id="invoice">
+            <div class="">
+                    <header>
+                        <div class="header-wrapper">
+                            <div style="color : #e67c3f;display: inline-block;width: 400px" class="" >
+                                <div class="" th:text="${vendor.company}"></div>
+                                <div class="" th:if="${vendor.company neq null}">
+                                    <th:block th:with="vendorAddr = ${vendor}">
+                                        <th:block th:text="${#strings.arrayJoin({vendorAddr.address1, vendorAddr.address2, vendorAddr.city, vendorAddr.state, vendorAddr.country, vendorAddr.zipCode}.{? #this neq ''}, ', ')}"></th:block>
+                                    </th:block>
+                                </div>
+                                <div class="email" th:if="${not #strings.isEmpty(vendor.email)}"><a th:href="|mailto:${vendor.email}|" th:text="${vendor.email}"></a></div>
+                            </div>
+                               <div style=" color: #a0be01; font-weight : 300;" class="header-right-div" >
+                            </div>
+                        </div>
+                    </header>
+
+
+                    <main>
+                        <div class="badge">
+                            <table style="margin-bottom:.50rem!important;margin-top:.50rem!important;color:#155724">
+                                <tfoot>
+                                <tr>
+                                    <td>
+                                        <b style="font-weight:bolder">
+                                        <img alt="" src="https://ci6.googleusercontent.com/proxy/9E96GvNYoHNIqPjyvocbEh2FYgcBQlYOfPgu9XyAgqOHO9oY2-BXOZM4M6y8AuID2kqMFDq769vsyq8hTcC3xuu2Cy2wwgfC4kq5PcUjkzXcCiPJ20DPGIbCTYw=s0-d-e1-ft#http://app.omproduce.com/customer-portal/app/assets/images/icons/tick.png">.</img>
+                                        Success!</b>Thank you, Suresh Babu Vunnam. We have received your
+                                        <b style="font-weight:bolder" th:text="${'Order #' + productOrderModel.productOrderID}" > </b>
+                                        for <b style="font-weight:bolder" th:text="${'' + totalCost}" > </b> and is being processed.
+                                        Below is copy of order confirmation for your reference.
+                                    </td>
+                                </tr>
+                                </tfoot>
+                            </table>
+                            <table style="margin-bottom:.50rem!important;margin-top:.50rem!important;color:#155724">
+                                <tfoot>
+                                <tr>
+                                    <td>If you have any questions, please contact us at     <span  th:text="${'' + store.storeID}"> </span> or     <span  th:text="${'' + store.email}"></span> </td>
+                                </tr>
+                                </tfoot>
+                            </table>
+                            <table style="margin-bottom:.50rem!important;margin-top:.50rem!important;color:#155724">
+                                <tfoot>
+                                <tr>
+                                    <td><b style="font-weight:bolder">Note :</b> Item Quantity is subject to change without prior notice. Product fulfillment is subject to availabilty.</td>
+                                </tr>
+                                </tfoot>
+                            </table>
+                            <table style="margin-bottom:.50rem!important;margin-top:.50rem!important;color:#155724">
+                                <tfoot>
+                                <tr>
+                                    <td>Thank you for your business!</td>
+                                </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+
+                        <!--Badge ends here-->
+
+
+                        <div style="overflow: hidden; padding:10px;font-family: sans-serif;" >
+                            <div style="  width: 40%;float:left;" >
+                                <div style="background: #e67c3f; margin-bottom: 5px; padding: 5px; border-start-start-radius: 10px;"> <b> Order Summary: </b></div>
+                                    <div style="padding-right:10px;padding-top:10px;" >
+                                        <div> <span style=""> Order Number : # </span>   <span style="font-weight:bolder" th:text="${productOrderModel.productOrderID}" ></span>  </div>
+                                        <div> <span style=""> Contact : </span>   <span style="font-weight:bolder" th:text="${vendor.firstName + ' ' + vendor.lastName}" ></span>  </div>
+                                        <div> <span style=""> Email : </span>   <span style="font-weight:bolder" th:text="${vendor.email}" ></span>  </div>
+                                        <div> <span style=""> Order Type : </span>   <span style="font-weight:bolder" th:text="${'hardcoded-change'}" ></span>  </div>
+                                        <div> <span style=""> Order Date : </span>   <span style="font-weight:bolder" th:text="${orderDate}" ></span>  </div>
+                                        <div> <span style=""> Ship Date: </span>   <span style="font-weight:bolder" th:text="${orderDate}" ></span>  </div>
+                                    </div>
+                            </div>
+                            <div style="  width: 30%;float:left;" >
+                                <div style="background: #e67c3f; margin-bottom: 5px; padding: 5px; "> <b> Bill To: </b></div>
+                                <div style="padding-right:10px;padding-top:10px;" >
+                                <div  th:if="${store.storeName neq null}" style="padding-top: 2px;  padding-bottom: 1em;">
+                                    <th:block th:with="addr = ${store}">
+                                        <th:block th:text="${#strings.arrayJoin({addr.addressInfo, addr.addressInfo1, addr.addressInfo2}.{? #this neq null}, ', ')}"></th:block>
+                                    </th:block>
+                                    <span  th:if="${not #strings.isEmpty(store.email)}">
+                                        <a th:href="|mailto:${store.email}|" th:text="${store.email}"></a>
+                                    </span>
+                                </div>
+                                </div>
+                            </div>
+                            <div style="  width: 30%;float:right;" >
+                                <div style="background: #e67c3f; margin-bottom: 5px; padding: 5px; border-start-end-radius: 10px;"> <b> Ship To : </b></div>
+                                <!--<img th:src="@{src/main/resources/static/css/images/konark_logo.png}" style=" height: 3em; width: 13em;"/>-->
+                                <div style="padding-right:10px;padding-top:10px;" >
+                                <div  th:if="${store.storeName neq null}" style="padding-top: 2px;  padding-bottom: 1em;">
+                                    <th:block th:with="addr = ${store}">
+                                        <th:block th:text="${#strings.arrayJoin({addr.addressInfo, addr.addressInfo1, addr.addressInfo2}.{? #this neq null}, ', ')}"></th:block>
+                                    </th:block>
+                                    <span  th:if="${not #strings.isEmpty(store.email)}">
+                                        <a th:href="|mailto:${store.email}|" th:text="${store.email}"></a>
+                                    </span>
+                                </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+
+
+
+
+                        <!--order summary ends here-->
+
+                        <div class="invoice">
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th class="text-left">Vendor Item Name</th>
+                                    <th class="text-right">Cost</th>
+                                    <th class="text-right">Quantity</th>
+                                    <th class="text-right">Total</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="itm : ${productOrderModel.productItems}">
+                                    <td class="no" th:text="${itmStat.index + 1}"></td>
+                                    <td class="text-left" th:text="${itm.vendorItemName}"></td>
+                                    <td class="unit" th:text="${'$' + itm.caseCost}"></td>
+                                    <td class="qty" th:text="${itm.quantityOrdered}"></td>
+                                    <td class="total" th:text="${'$' + itm.itemTotal}"></td>
+                                </tr>
+                                </tbody>
+                                <tfoot>
+                                <tr>
+                                    <td colspan="2"></td>
+                                    <td colspan="2">Grand Total : </td>
+                                    <td th:text="${'$' + totalCost}"></td>
+                                </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+
+                    </main>
+                    <footer>
+                        <div class="row contacts" style="padding-top:5px;border-top: 1px solid #a0be01;text-align: center;">
+                            Konark Grocers Product Order.
+                        </div>
+                    </footer>
+            </div>
+        </div>
+    </body>
+</html>

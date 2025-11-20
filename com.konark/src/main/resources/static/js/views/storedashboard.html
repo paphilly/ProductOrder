@@ -1,0 +1,62 @@
+<img data-bind='visible: loadingStatus.isBusy()' class="loading-img" style="width: 9em;" src="./css/images/loading.gif"/>
+<oj-bind-if test="[[loadingStatus.isLoaded()]]">
+    <div class="oj-panel kn-oj-panel-border2px oj-flex oj-padding-start">
+        <div class="oj-flex-item oj-sm-12 oj-md-2 oj-lg-2 oj-sm-padding-2x-start oj-sm-padding-2x-top oj-sm-padding-2x-end">
+            <div class="oj-sm-padding-1x-bottom  oj-typography-semi-bold">Store</div>
+            <oj-select-single class = "kn-dropdown-icon-color" slot="value" id="storeid"
+                              data="[[storeDP]]"
+                              on-oj-value-action="[[storeValueActionHandler]]"
+                              placeholder="Select a Store from the list..."
+                              value="{{storeSelectValue}}"
+                              style="max-width: 26em;">
+            </oj-select-single>
+        </div>
+        <div class="oj-flex-item oj-sm-12 oj-md-2 oj-lg-2 oj-sm-padding-2x-start oj-sm-padding-2x-top oj-sm-padding-2x-end">
+        <div class="oj-sm-padding-1x-bottom  oj-typography-semi-bold">Chart Type</div>
+            <oj-select-single class = "kn-dropdown-icon-color" slot="value" id="charTypeid"
+                              data="[[chartTypeDP]]"
+                              on-oj-value-action="[[charTypeChangeHandler]]"
+                              placeholder="Select a chart"
+                              value="{{chartTypeSelectValue}}"
+                              style="max-width: 26em;">
+            </oj-select-single>
+        </div>
+
+        <div class="oj-flex-item oj-sm-12 oj-md-12 oj-lg-12 oj-sm-padding-2x-start oj-sm-padding-2x-top oj-sm-padding-2x-end">
+        <oj-bind-if test="[[showSalesChart]]">
+            <br>
+            <oj-bind-text value="[[ 'Daily sales for: ' + storeSelectValue()  ]]"></oj-bind-text>
+            <div id='chart-container11'>
+                <oj-chart id="barChart"
+                          type="[[salesChartType]]"
+                          orientation="[['vertical']]"
+                          data="[[totalSalesCountDataProvider]]"
+                          animation-on-display="auto"
+                          animation-on-data-change="auto"
+                          hover-behavior="dim"
+                          zoom-and-scroll="live"
+                          initial-zooming ="last"
+                          legend.position="top"
+                          legend.text-style = "[[{fontSize: legendFontSize()}]]"
+                          y-axis.title="Total Sales"
+                          x-axis.title="[[xAxisLabel ]]"
+                          style-defaults.bar-gap-ratio="0.5"
+                          value-formats.series.tooltip-label="Series :"
+                          value-formats.group.tooltip-label="Day :"
+                          value-formats.value.tooltip-label="Count :"
+                          style="height:300px;">
+                    <template slot='itemTemplate' data-oj-as='item'>
+                        <oj-chart-item value='[[item.data.value]]'
+                        color='orange'
+                                       group-id='[[ [item.data.group] ]]'
+                                       series-id='[[item.data.series]]'
+                        >
+                        </oj-chart-item>
+                    </template>
+                </oj-chart>
+            </div>
+        </oj-bind-if>
+        </div>
+
+
+</oj-bind-if>

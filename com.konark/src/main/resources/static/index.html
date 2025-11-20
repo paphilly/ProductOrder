@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <title>Konark</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1" />
+    <link rel="icon" class="are-invert-color" href="css/images/kg_fav.png" type="image/x-icon" />
+    <link rel="stylesheet" href="css/redwood/oj-redwood-min.css" type="text/css" />
+    <link rel="stylesheet" href="css/app.css" type="text/css" />
+    <!--
+   <link rel="stylesheet" href="css/bootstrap.min.css" type="text/css"/>
+   -->
+</head>
+<body class="oj-web-applayout-body">
+<div id="globalBody" class="oj-offcanvas-outer-wrapper oj-offcanvas-page">
+    <div id="pageContent" class="oj-web-applayout-page">
+        <header role="banner" class="fixed-header">
+            <div class="kn-oj-web-applayout-max-width oj-sm-align-items-center">
+                <div class="oj-flex oj-padding-start">
+                    <div data-bind="visible: headerTabSelectedItem() !== 'login' " style="display: none;">
+                        <div class="oj-flex-item oj-sm-12 oj-md-3 oj-lg-2 oj-flex-bar-middle oj-sm-align-items-baseline">
+                            <div data-bind="click: function (data) { homeButtonHandler() }">
+                                <span class="logo"> </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div role="navigation" class="kn-page-tabs oj-flex-item oj-sm-12 oj-md-8 oj-lg-8 oj-web-applayout-max-width oj-web-applayout-navbar" style="margin-top: 11px;">
+                        <oj-bind-if test="[[localStorage.authenticated || userAuthenticated]]">
+                            <oj-tab-bar edge="top" class="oj-sm-condense" overflow="popup" id="tabbar2" selection="{{headerTabSelectedItem}}" data="{{tabsDataProvider}}">
+                                <template slot="itemTemplate" data-oj-as="item">
+                                    <li :class="[[{'oj-disabled' : item.data.disabled}]]">
+                                        <a href="#">
+                                            <oj-bind-text value="[[item.data.name]]"></oj-bind-text>
+                                        </a>
+                                    </li>
+                                </template>
+                            </oj-tab-bar>
+                        </oj-bind-if>
+                    </div>
+
+                    <div role="navigation" class="oj-flex-item oj-sm-12 oj-md-2 oj-lg-2 oj-web-applayout-max-width oj-web-applayout-navbar" style="margin-top: 11px;">
+                        <oj-bind-if test="[[localStorage.authenticated || userAuthenticated]]">
+                            <oj-toolbar>
+                                <oj-menu-button id="userMenu" display="[[smScreen() ? 'icons' : 'all']]" chroming="half" style="font-size: 12px;">
+                                            <span>
+                                                <oj-bind-text value="[[loggedInUser]]"></oj-bind-text>
+                                            </span>
+                                    <span slot="endIcon" :class="[[{'oj-icon': smScreen(), 'oj-component-icon oj-button-menu-dropdown-icon': !smScreen()}]]"></span>
+                                    <oj-avatar role="img" size="xxs" initials="[[initials]]" background="green"></oj-avatar>
+                                    <oj-menu id="menu1" slot="menu" on-oj-action="[[userMenuAction]]" style="display: none;">
+                                        <oj-bind-if test="[[JSON.parse(localStorage.userJson).role === 'Admin']]">
+                                        <oj-option id="createNewUser" value="createNewUser">User Administration</oj-option>
+                                        </oj-bind-if>
+                                        <oj-option id="help" value="help">Help</oj-option>
+                                        <oj-option id="out" value="out">Sign Out</oj-option>
+                                    </oj-menu>
+                                </oj-menu-button>
+                            </oj-toolbar>
+                        </oj-bind-if>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <oj-bind-if test="[[headerTabSelectedItem() === 'login']]">
+            <oj-module class="" config="[[oj.ModuleElementUtils.createConfig({name: 'login'})]]"> </oj-module>
+        </oj-bind-if>
+
+        <oj-bind-if test="[[headerTabSelectedItem() !== 'login']]">
+            <oj-module class="kn-contentlayout-width oj-web-applayout-content" config="[[moduleConfig]]"> </oj-module>
+        </oj-bind-if>
+
+        <div data-bind="visible: headerTabSelectedItem() !== 'login' " style="display: none;">
+            <footer class="oj-web-applayout-footer" role="contentinfo">
+                <div class="oj-flex oj-padding-start oj-padding-end">
+                    <div class="oj-flex-item oj-sm-12 oj-md-5"></div>
+                    <div class="oj-flex-item oj-sm-12 oj-md-4">
+                        <div class="oj-web-applayout-footer-item oj-web-applayout-max-width oj-text-sm">
+                            Copyright © 2021 Konark. All rights reserved.
+                        </div>
+                    </div>
+                    <div class="oj-flex-item oj-sm-12 oj-md-3"></div>
+                </div>
+            </footer>
+        </div>
+
+        <div id="helpdialogWrapper">
+            <oj-dialog style="display: none; width: 15vw; height: 11vw;" id="helpDialog" dialog-title="Need info?">
+                <div slot="body">
+                    Write to Konark Grocers if any queries!
+                    <div><br /></div>
+                    <p><a href="mailto:test@konarkgrocers.net">Send email</a></p>
+                </div>
+                <div slot="footer">
+                    <oj-button id="okButton" class="oj-button-sm" on-oj-action="[[closeHelp]]">Ok</oj-button>
+                </div>
+            </oj-dialog>
+        </div>
+
+        <div id="createUserdialogWrapper">
+            <oj-dialog style="display: none; width: 45vw; height: 28vw;" id="createUserDialog">
+                <div slot="header">
+                    <b id="dialogTitleId" class="">
+                        <div class="kn-createuser-tabs">
+                            <oj-tab-bar class="" edge="top" selection="{{createUserTabSelectedItem}}" data="[[createUserTabDP]]">
+                                <template slot="itemTemplate" data-oj-as="item">
+                                    <li :class="[[{'oj-disabled' : item.data.disabled === 'true'}]]">
+                                        <a href="#">
+                                            <oj-bind-text value="[[item.data.name]]"> </oj-bind-text>
+                                        </a>
+                                    </li>
+                                </template>
+                            </oj-tab-bar>
+                        </div>
+                    </b>
+                </div>
+
+                <div slot="body">
+                    <oj-bind-if test="[[createUserTabSelectedItem() === 'Create']]">
+                        <div class="oj-sm-padding-4x-top oj-flex oj-padding-start oj-padding-end">
+                            <div class="oj-flex-item oj-sm-12 oj-md-12 oj-lg-12 oj-sm-padding-5x-end">
+                                <label><b>Username</b></label>
+                                <oj-input-text id="titlepatternid" class="oj-sm-margin-1x-top" value="{{newUserName}}" on-value-changed="{{newUserChangeHandler}}" disabled="[[disableNewUserName]]" clear-icon="conditional">
+                                </oj-input-text>
+                            </div>
+                        </div>
+
+                        <oj-bind-if test="[[showMessage()]]">
+                            <div id="notificationMessagesEmail">
+                                <!-- Messages -->
+                                <oj-messages class="" messages="[[messagesDataprovider]]" display-options.category="none"> </oj-messages>
+                            </div>
+                        </oj-bind-if>
+
+                        <oj-bind-if test="[[createdNewClicked]]">
+                            <div class="oj-flex oj-padding-start oj-padding-end oj-sm-padding-3x-top">
+                                <div class="oj-flex-item oj-sm-12 oj-md-4 oj-lg-4 oj-sm-padding-5x-end">
+                                    <div class="oj-typography-body-md oj-typography-semi-bold oj-sm-margin-1x-top"><b>Password (please remember)</b></div>
+                                    <oj-input-text id="newpass" class="oj-sm-margin-1x-top" value="{{newPassword}}" messages-custom="{{invalidNewPass}}" clear-icon="conditional"> </oj-input-text>
+
+                                    <div class="oj-typography-body-md oj-typography-semi-bold oj-sm-margin-1x-top"><b>Firstname</b></div>
+                                    <oj-input-text id="newfn" class="oj-sm-margin-1x-top" value="{{newFirstName}}" messages-custom="{{invalidNewFN}}" clear-icon="conditional"> </oj-input-text>
+
+                                    <div class="oj-typography-body-md oj-typography-semi-bold oj-sm-margin-1x-top"><b>Lastname</b></div>
+                                    <oj-input-text id="newln" class="oj-sm-margin-1x-top" value="{{newLastName}}" messages-custom="{{invalidNewLN}}" clear-icon="conditional"> </oj-input-text>
+
+                                    <div class="oj-typography-body-md oj-typography-semi-bold oj-sm-margin-1x-top"><b>Email</b></div>
+                                    <oj-input-text id="newmail" class="oj-sm-margin-1x-top" value="{{newEmail}}" clear-icon="conditional" messages-custom="{{invalidNewEmail}}"> </oj-input-text>
+
+                                    <div class="oj-sm-margin-2x-top oj-sm-margin-4x-bottom"></div>
+                                </div>
+
+                                <div class="oj-sm-padding-5x-start oj-flex-item oj-sm-12 oj-md-8 oj-lg-8">
+                                    <div class="oj-typography-body-md oj-typography-semi-bold oj-sm-margin-1x-top"><b>User Type Role</b></div>
+                                    <oj-radioset labelled-by="roleradio" class="oj-choice-direction-row" slot="value" value="{{newRole}}" messages-custom="{{invalidNewRole}}">
+                                        <oj-option value="user">User</oj-option>
+                                        <oj-option value="admin">Admin</oj-option>
+                                    </oj-radioset>
+
+                                    <div class="oj-typography-body-md oj-typography-semi-bold oj-sm-margin-1x-top"><b>Select Stores</b></div>
+                                    <oj-checkboxset class="oj-choice-direction-row" options="{{storesCheckBoxDP}}" value="{{newUserStoresList}}" messages-custom="{{invalidNewStoresList}}"> </oj-checkboxset>
+
+                                    <div class="oj-sm-padding-3x-top oj-typography-body-md oj-typography-semi-bold oj-sm-margin-1x-top"><b>Select Locations</b></div>
+                                    <oj-checkboxset class="oj-choice-direction-row" options="{{locationsCheckBoxDP}}" value="{{newUserLocationsList}}" messages-custom="{{invalidNewLocationList}}"> </oj-checkboxset>
+
+                                    <div class="oj-sm-padding-3x-top oj-sm-padding-3x-top oj-typography-body-md oj-typography-semi-bold oj-sm-margin-1x-top"><b>Select Pages</b></div>
+                                    <oj-checkboxset class="oj-choice-direction-row" options="{{pagesCheckBoxDP}}" value="{{newUserPagesList}}" messages-custom="{{invalidNewPagesList}}"> </oj-checkboxset>
+                                </div>
+                            </div>
+                        </oj-bind-if>
+                    </oj-bind-if>
+
+                    <oj-bind-if test="[[createUserTabSelectedItem() === 'Update']]">
+                        test
+                    </oj-bind-if>
+                </div>
+
+                <div slot="footer">
+                    <oj-button id="createid" class="login-button oj-button-sm" chroming="callToAction" disabled="[[userExistsAlready]]" on-oj-action="[[createUserName]]">Create</oj-button>
+                    <oj-button id="okButton" class="login-button oj-button-sm" chroming="callToAction" on-oj-action="[[closeCreateUserDialog]]">Close</oj-button>
+                </div>
+            </oj-dialog>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="js/libs/require/require.js"></script>
+<script type="text/javascript" src="js/main.js"></script>
+</body>
+</html>
+<!-- Template for rendering navigation items -->
+<script type="text/html" id="navTemplate">
+    <li><a href="#">
+        <oj-bind-text value="[[$data.detail.label]]"></oj-bind-text>
+    </a></li>
+</script>

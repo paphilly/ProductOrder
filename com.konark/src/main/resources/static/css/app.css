@@ -1,0 +1,411 @@
+html {
+	-webkit-text-size-adjust: 100%;
+	font-size: 12px;
+	font-family : 'Roboto-Regular';
+}
+.logo {
+	   display: inline;
+	    height: 4em;
+        width: 15em;
+    	content: url("images/konark_logo.png");
+}
+
+.fixed-header {
+
+}
+
+.kn-oj-web-applayout-max-width {
+	margin-left: auto;
+	margin-right: auto;
+	width: 100%;
+	max-width: 1500px;
+	box-sizing: border-box;
+}
+
+.kn-contentlayout-width {
+	margin-left: auto;
+	margin-right: auto;
+	width: 100%;
+	max-width: 100%;
+	box-sizing: border-box;
+	background: white;
+}
+
+
+.kn-oj-panel-border2px {
+       border-radius: 2px;
+       padding: 1rem;
+}
+
+
+.oj-web-applayout-page {
+background: white;
+}
+
+
+.loading-img {
+	display: block;
+	margin: 0 auto;
+	padding-top: 50px;
+	padding-bottom: 40px;
+}
+
+.product-loading-img {
+    display: block;
+    margin: 0 auto;
+    z-index: 1000;
+    top: 5em;
+    position: relative;
+}
+.accountspayable-loading-img {
+    display: block;
+    margin: 0 auto;
+    z-index: 1000;
+    top:  10em;
+    position: absolute;
+    height: 8px;
+    width: 50px;
+    left: 29em;
+}
+
+.buttontilecolor.oj-buttonset .oj-selected {
+background : #a2bf09 !important;
+}
+
+.kn-switch.oj-switch .oj-switch-thumb {
+    height: 1.5em;
+    }
+
+.kn-switch.oj-switch .oj-switch-track {
+    height: 1.8em;
+    width: 3em;
+}
+
+
+
+.oj-progress-bar-value{
+   background-color : #E67C3F;
+
+}
+
+ .oj-badge-approved {
+      --oj-badge-bg-color:  #80ff80;
+      --oj-badge-text-color: black;
+}
+
+
+
+.oj-text-field .oj-text-field-container {
+border-radius: 20px;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 4.5em;
+    height: 2.5em;
+    top: -6px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #8c8585;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+    height: 1.9em;
+    width: 1.9em;
+    left: 3px;
+    bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #a0be01;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #a0be01;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 3em;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+
+
+.oj-select-selected-choice {
+    border-radius: 1em;
+    background: #a0be01;
+}
+
+.oj-text-field .oj-text-field-container {
+border: 1px solid #a0be01;
+
+}
+.oj-text-field .oj-text-field-container .oj-active {
+border: 1px solid #a0be01;
+
+}
+.oj-text-field .oj-text-field-start-end-icon {
+color : #a0be01;
+}
+
+
+.oj-button-jqui.oj-default.oj-button-cta-chrome,
+.oj-button-jqui.oj-focus-only.oj-button-cta-chrome,
+.oj-button-nocomp.oj-button-cta-chrome,
+.oj-button.oj-default.oj-button-cta-chrome .oj-button-button,
+.oj-button.oj-focus-only.oj-button-cta-chrome .oj-button-button {
+    background: linear-gradient( hsl(0deg 100% 86%), hsl(21deg 100% 51%) );
+	border-radius: 20px;
+	border : 0px !important;
+	color: black !important;
+}
+
+.oj-button-jqui.oj-hover.oj-button-cta-chrome,
+.oj-button-nocomp.oj-button-cta-chrome:hover,
+.oj-button.oj-hover.oj-button-cta-chrome .oj-button-button {
+background: linear-gradient( hsl(0deg 100% 86%), hsl(21deg 100% 51%) );
+	border-radius: 20px;
+	border : 0px !important;
+	color: black !important;
+
+}
+
+.notified-button .oj-button-label, .oj-button-label oj-option {
+    background: linear-gradient(3deg, #237d9e, #67d6ff);
+    color: black;
+}
+.pending-button .oj-button-label, .oj-button-label oj-option {
+     background: linear-gradient(3deg, #ac630d, #ff910f);
+    color: black;
+}
+.paid-button .oj-button-label, .oj-button-label oj-option {
+    background: linear-gradient(3deg,  #508223, #d9ff0e);
+    color: black;
+}
+.approve-button .oj-button-label, .oj-button-label oj-option {
+    background:  linear-gradient(3deg, #6ce86d, #bbecbb);  
+    color: black;
+}
+
+
+
+.kn-dropdown-icon-color .oj-component-icon:before {
+color: #a0be01;
+}
+
+.kn-border-green {
+    border: 1px solid #a0be01;
+}
+
+.kn-page-tabs .oj-tabbar-horizontal .oj-tabbar-item.oj-selected {
+    background:  #e67c3f;
+    background: linear-gradient( hsl(0deg 100% 99%), #e56f29 );
+    border-radius: 13px;
+    padding: 13px;
+    border: 1px solid #e67c3f !important;
+
+
+}
+.kn-page-tabs .oj-tabbar-horizontal .oj-tabbar-item {
+    padding: 13px;
+}
+
+.kn-page-tabs .oj-tabbar-horizontal .oj-tabbar-item:first-of-type {
+border-radius: 13px !important;
+}
+
+.kn-page-tabs .oj-tabbar-horizontal .oj-tabbar-item.oj-tabbar-item-last-child{
+border-radius: 13px !important;
+}
+.kn-page-tabs .oj-tabbar-horizontal .oj-tabbar-item.oj-selected {
+    border:  #e67c3f;
+    }
+
+.kn-page-tabs .oj-tabbar-horizontal .oj-tabbar-item.oj-hover {
+    background:   #e67c3f;
+    background: linear-gradient( hsl(0deg 100% 99%), #e56f29 );
+    border-radius: 13px;
+    padding-left: 13px;
+    padding-right: 13px;
+        border: 1px solid #e67c3f !important;
+}
+
+.kn-page-tabs .oj-tabbar-horizontal .oj-tabbar-item.oj-tabbar-item{
+   border-right-width: 1px !important;
+   border-left-width: 1px !important;
+    border:  1px solid  #e67c3f;
+    border-radius: 13px;
+
+}
+
+
+
+/* Input number up arrow and down arrow sytle change*/
+
+.oj-inputnumber-up-icon:before {
+color : green;
+}.oj-inputnumber-down-icon:before {
+color : red;
+}
+
+.kn-disabled {
+pointer-events: none;
+opacity: 0.4;
+}
+
+
+.kn-table-header-class {
+background : #d2e099;
+}
+
+.kn-table-header-class-orange {
+background : #e67c3f;
+}
+
+
+/*disabled button border radius override*/
+.oj-button-toggle.oj-disabled.oj-button-cta-chrome, .oj-button-toggle.oj-disabled.oj-button-full-chrome, .oj-button.oj-disabled.oj-button-cta-chrome .oj-button-button, .oj-button.oj-disabled.oj-button-full-chrome .oj-button-button {
+border-radius: 20px !important;
+}
+
+
+.background-login {
+  height: 100%;
+  /* Center and scale the image nicely */
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+
+
+
+@keyframes login-bg {
+  from {opacity: 0.7;}
+  to {opacity: 1;}
+}
+
+.bg-img {
+   top: 2em;
+}
+
+/* Add styles to the form container */
+.login-container {
+   background: linear-gradient(   131deg  , #ffffff, #ffffff);
+   /* background: white;  */
+    border-radius: 5px;
+    width: 23em;
+    padding: 1.7em;
+    margin: 0 auto;
+    margin-top: 8em;
+    border: 1px solid #d6d4ce;
+}
+.login-button .oj-button-label, .oj-button-label oj-option {
+      background: linear-gradient(  18deg, #3bc53fd1, #54e443);
+    color: white;
+}
+
+.user-icon {
+    	content: url("images/user.png");
+    	    height: 1em;
+            width: 1em;
+}
+
+.oj-menu-item.oj-focus{
+  background : #e4efab;
+}
+
+
+/* ------------------------------------- */
+@font-face {
+	font-family: 'Font1';
+    src: url("fonts/futura-ndj-webfont.eot");
+    src: url("fonts/futura-ndj-webfont.eot?#iefix") format("embedded-opentype"), url("fonts/futura-ndj-webfont.woff") format("woff"), url("fonts/futura-ndj-webfont.ttf") format("truetype"), url("fonts/futura-ndj-webfont.svg#FuturaNDJMedium") format("svg");
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+	font-family: 'Font2';
+    src: url("fonts/SignikaNegative-Light.eot");
+    src: url("fonts/SignikaNegative-Light.eot?#iefix") format("embedded-opentype"), url("fonts/SignikaNegative-Light.woff") format("woff"), url("fonts/SignikaNegative-Light.ttf") format("truetype");
+    font-weight: 300;
+    font-style: normal;
+}
+
+@font-face {
+	font-family: 'Font3';
+    src: url('fonts/Ubuntu-R.woff');
+}
+
+@font-face {
+	font-family: 'Font4';
+    src: url("fonts/App_iconfont.woff") format("woff");
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+	font-family: 'Font5';
+    src: url("fonts/HammersmithOne-Regular.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+	font-family: 'Font6';
+    src: url("fonts/SFProDisplay-Regular.woff") format("woff");
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+	font-family: 'Font7';
+    src: url("fonts/SFProText-Regular.woff") format("woff");
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+	font-family: 'Font8';
+    src: url("fonts/SFCompactRounded-Regular.woff") format("woff");
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+	font-family: 'Roboto-Regular';
+    src: url("fonts/Roboto-Regular.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+}

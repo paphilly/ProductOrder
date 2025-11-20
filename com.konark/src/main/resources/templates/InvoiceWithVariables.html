@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html>
+<head>
+    <style>
+@page {
+    @top-right {
+        content: "Page " counter(page) " of " counter(pages);
+	    font-family: sans-serif;
+        padding-right: 15px;
+    }
+}
+
+#invoice{
+    padding: 0px;
+}
+
+.invoice {
+    position: relative;
+    padding: 5px
+}
+
+.invoice table {
+      width: 100%;
+      border: none;
+}
+
+.invoice table td,.invoice table th {
+    padding: 5px;
+}
+
+.invoice table tr:nth-child(even) {
+    background-color: #e5ecc7;
+}
+
+.invoice table th {
+    font-weight: 400;
+    font-size: 14px;
+    background: #e67c3f;
+    text-align: center;
+}
+
+.invoice table .qty,.invoice table .total,.invoice table .unit {
+    text-align: center;
+}
+
+.invoice table .no {
+ text-align: center;
+}
+
+.invoice table tfoot td {
+    background: 0 0;
+    border-bottom: none;
+    white-space: nowrap;
+    text-align: right;
+    padding: 10px 20px;
+    font-size: 1.2em;
+    border: none;
+}
+
+.invoice table tfoot tr:first-child td {
+    border: none;
+}
+
+.invoice table tfoot tr:last-child td {
+    color:  #e67c3f;
+    font-size: 1.3em;
+    font-weight: 500;
+
+}
+
+.invoice table tfoot tr td:first-child {
+    border: none;
+}
+
+.invoice footer {
+    width: 100%;
+    text-align: center;
+    color: #777;
+    padding: 8px 0
+}
+.invoice {
+    font-size: 14px;
+    line-height: 1.4;
+    font-family: sans-serif;
+}
+
+.header-wrapper {
+    width: 100%;
+    overflow: hidden;
+}
+.header-left-div {
+    width: 300px;
+    float:left;
+}
+.header-right-div {
+    float: right;
+    padding-top : 5px;
+}
+
+</style>
+</head>
+<body>
+
+        <div id="invoice">
+            <div class="invoice">
+                    <header>
+                        <div class="header-wrapper">
+                         
+
+                            <div style="color : #e67c3f;" class="header-left-div" >
+
+                                
+                                <div class="" th:text="${vendor.company}"></div>
+                                <div class="" th:if="${vendor.company neq null}">
+                                    <th:block th:with="vendorAddr = ${vendor}">
+                                        <th:block th:text="${#strings.arrayJoin({vendorAddr.address1, vendorAddr.address2, vendorAddr.city, vendorAddr.state, vendorAddr.country, vendorAddr.zipCode}.{? #this neq ''}, ', ')}"></th:block>
+                                    </th:block>
+                                </div>
+                                <div class="email" th:if="${not #strings.isEmpty(vendor.email)}"><a th:href="|mailto:${vendor.email}|" th:text="${vendor.email}"></a></div>
+
+
+
+                            </div>
+                            
+                            
+                               <div style=" color: #a0be01; font-weight : 300;" class="header-right-div" >
+
+								<div> <b> Ship To : </b></div>
+                                <img th:src="@{src/main/resources/static/css/images/konark_logo.png}" style=" height: 3em; width: 13em;"/>
+                                  <div  th:if="${store.storeName neq null}" style="padding-top: 2px;  padding-bottom: 1em;">
+                                    <th:block th:with="addr = ${store}">
+                                        <th:block th:text="${#strings.arrayJoin({addr.addressInfo, addr.addressInfo1, addr.addressInfo2}.{? #this neq null}, ', ')}"></th:block>
+                                    </th:block>
+                                    <span  th:if="${not #strings.isEmpty(store.email)}">
+                                        <a th:href="|mailto:${store.email}|" th:text="${store.email}"></a>
+                                    </span>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </header>
+
+                    <main>
+                        <div class="" style="padding-top:2px;border-top: 1px solid #a0be01;">
+
+                            <div style="overflow: hidden;" >
+                                <div style="  width: 200px;float:left;" >
+                                    <h3 class="to" style="color : #e67c3f;">Order ID : <th:block th:text="${productOrderModel.productOrderID}"></th:block></h3>
+                                </div>
+                                <div style="  width: 230px;float:left;" >
+                                    <h3 class="to" style="color : #e67c3f;">Order Date : <th:block th:text="${orderDate}"></th:block></h3>
+                                 </div>
+                                 <div style="  width: 150px;float:right;" >
+                                    <h3 class="to" style="color : #e67c3f;">Order Total : <th:block th:text="${'$' + #numbers.formatDecimal(totalCost, 1, 2)}"></th:block></h3>
+                                 </div>
+                            </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th class="text-left">Vendor Item Name</th>
+                                    <th class="text-right">Vendor Part Num</th>
+                                    <th class="text-right">Cost</th>
+                                    <th class="text-right">Quantity</th>
+                                    <th class="text-right">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="itm : ${productOrderModel.productItems}">
+                                    <td class="no" th:text="${itmStat.index + 1}"></td>
+                                    <td class="text-left" th:text="${itm.vendorItemName}"></td>
+                                    <td class="text-right" th:text="${itm.vendorPartNumber}"></td>
+                                    <td class="unit" th:text="${'$' + itm.caseCost}"></td>
+                                    <td class="qty" th:text="${itm.quantityOrdered}"></td>
+                                    <td class="total" th:text="${'$' + #numbers.formatDecimal(itm.itemTotal, 1, 2)}"></td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="2"></td>
+                                    <td colspan="2">Grand Total : </td>
+                                   <td th:text="${'$' + #numbers.formatDecimal(totalCost, 1, 2)}"></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+						</div>
+                    </main>
+                    <footer>
+                        <div class="row contacts" style="padding-top:2px;border-top: 1px solid #a0be01;">
+                            Konark Grocers Product Order.
+                        </div>
+                    </footer>
+            </div>
+        </div>
+    </body>
+</html>

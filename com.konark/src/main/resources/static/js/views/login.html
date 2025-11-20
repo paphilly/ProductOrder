@@ -1,0 +1,38 @@
+<img data-bind='visible: loadingStatus.isBusy()' class="loading-img" src="./css/images/loading.gif"/>
+<oj-bind-if test="[[loadingStatus.isLoaded()]]">
+    <div class="bg-img">
+        <div class="login-container">
+            <div class="oj-sm-margin-1x-bottom" style="  margin: auto;width: 65%;">
+                <span class="logo"> </span>
+            </div>
+            <div class="oj-sm-margin-2x-bottom ">
+                <div style="height:1em;">
+                    <oj-bind-if test="[[appControls.loginError]]">
+                        <div class="oj-sm-margin-3x-bottom" style="color: red">
+                            <b> Invalid username and password.</b>
+                        </div>
+                    </oj-bind-if>
+                </div>
+            </div>
+            <div style="height:6em;" >
+                <label><b>Username</b></label>
+                <oj-input-text class="oj-sm-margin-1x-top" id="username-id"  raw-value="{{usernameRawValue}}"  messages-custom="{{invalidUserMsg}}"  requried on-keydown="[[submitInput ]]" >
+                    <oj-button tabindex="-1"  slot="end" display="icons" chroming="borderless" disabled > <span tabindex="-1" slot="endIcon" class="user-icon"> </span> </oj-button>
+                </oj-input-text>
+            </div>
+            <div style="height:6em;" >
+                <label  ><b>Password</b></label>
+                <oj-input-password class="oj-sm-margin-1x-top" id="password"  raw-value="{{passwordRawValue}}"  requried mask-icon="visible" messages-custom="{{invalidPassMsg}}" on-keydown="[[submitInput ]]" >       </oj-input-password>
+            </div>
+            <oj-button id="login" class="login-button oj-sm-margin-4x-top oj-sm-margin-4x-bottom oj-sm-margin-1x-end oj-button-md" chroming="callToAction" on-oj-action="[[loginAction]]" style = "width: 12em;">
+                Login
+            </oj-button>
+           <!-- <oj-button id="login" class="login-button oj-sm-margin-4x-top oj-sm-margin-4x-bottom oj-sm-margin-1x-end oj-button-md" chroming="callToAction" on-oj-action="[[clearLoginAction]]" style = "width: 12em;">
+                Clear
+            </oj-button>-->
+            <br>  <br>
+        </div>
+    </div>
+    </div>
+</oj-bind-if>
+</div>
