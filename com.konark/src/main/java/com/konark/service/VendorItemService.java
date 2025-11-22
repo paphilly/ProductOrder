@@ -1,17 +1,23 @@
 package com.konark.service;
 
-import java.math.BigDecimal;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.konark.dto.VendorInventoryProjection;
 import com.konark.entity.InventoryEntity;
@@ -24,7 +30,6 @@ import com.konark.model.VendorItemModel;
 import com.konark.repository.InventoryRepository;
 import com.konark.repository.VendorItemRepository;
 import com.konark.repository.VendorRepository;
-import com.konark.util.LevenshteinItemSearch;
 import com.konark.util.LevenshteinWordSearch;
 
 @Component
@@ -48,7 +53,7 @@ public class VendorItemService {
 
 	public VendorItemModel getVendorItemsByVendorNumber(String vendorNumber) {
 
-		Iterable<VendorItemEntity> vendorItems = vendorItemRepository.findVendorItemsByVendorNumber(vendorNumber);
+		List<VendorItemEntity> vendorItems = vendorItemRepository.findByVendorNumber(vendorNumber);
 		vendorItems.forEach(vendorItemModel.getVendorItems()::add);
 		return vendorItemModel;
 	}
@@ -148,7 +153,7 @@ public class VendorItemService {
 //		 
 //		 List<VendorInventoryProjection> results = vendorItemRepository.findByStoreIdAndVendorNumber(storeID, vendorNumber);
 
-		 List<VendorInventoryProjection> vendorItemResults = vendorItemRepository.findByVendorNumber(vendorNumber);
+		 List<VendorInventoryProjection> vendorItemResults = vendorItemRepository.findItemsByVendorNumber( vendorNumber);
 
 
 			vendorItemResults.forEach(vendorItem -> {
@@ -303,6 +308,103 @@ productItemModel.setVendorName(vendorItem.getVendorName());
 		// String::toString));
 
 		return departmentsMap;
+	}
+
+
+
+	// Detect file type
+	public VendorItemModel parseAndSave(MultipartFile file, String vendorNumber) throws Exception {
+		String fileName = file.getOriginalFilename().toLowerCase();
+
+		VendorItemModel vendorItemModel = new VendorItemModel();
+
+		if (fileName.endsWith(".csv")) {
+			vendorItemModel = saveCsv(file,vendorNumber);
+		} else if (fileName.endsWith(".xlsx")) {
+			vendorItemModel = saveExcel(file,vendorNumber);
+		} else {
+			throw new RuntimeException("Unsupported file format");
+		}
+		return vendorItemModel;
+	}
+
+	// ----------------------------
+	// CSV PARSING
+	// ----------------------------
+	private VendorItemModel saveCsv(MultipartFile file, String vendorNumber) throws Exception {
+
+		VendorItemModel vendorItemModel = new VendorItemModel();
+		List<VendorItemEntity> vendorItems = new ArrayList<VendorItemEntity>();
+		vendorItemModel.setvendorItems( vendorItems );
+		try ( BufferedReader reader = new BufferedReader(
+			new InputStreamReader( file.getInputStream()))) {
+
+			String line;
+			reader.readLine(); // skip header row
+
+			while ((line = reader.readLine()) != null) {
+				String[] cols = line.split(",");
+
+
+				VendorItemEntity vendorItem = new VendorItemEntity();
+				vendorItem.setVendorPartNumber(cols[0].trim());
+				vendorItem.setItemNumber(cols[1].trim());
+				vendorItem.setItemName(cols[2].trim());
+				vendorItem.setCostPerItem(cols[3].trim());
+				vendorItem.setWeightCost(cols[4].trim());
+				vendorItem.setCaseCost(cols[5].trim());
+				vendorItem.setNumberOfItemsPerVendorCase(cols[6].trim());
+
+				vendorItem.setVendorNumber( vendorNumber );
+				vendorItem.setStoreID( "9999" );
+vendorItems.add( vendorItem );
+				vendorItemRepository.save(vendorItem);
+			}
+		}
+
+		return vendorItemModel;
+	}
+
+	// ----------------------------
+	// EXCEL (.xlsx) PARSING
+	// ----------------------------
+	private VendorItemModel saveExcel(MultipartFile file,String vendorNumber) throws Exception {
+		Workbook workbook = WorkbookFactory.create( file.getInputStream());
+		Sheet sheet = workbook.getSheetAt( 0);
+
+		VendorItemModel vendorItemModel = new VendorItemModel();
+		List<VendorItemEntity> vendorItems = new ArrayList<VendorItemEntity>();
+		vendorItemModel.setvendorItems( vendorItems );
+
+		DataFormatter formatter = new DataFormatter();
+		for (int i = 1; i <= sheet.getLastRowNum(); i++) { // skip header
+			Row row = sheet.getRow( i);
+			if (row == null) continue;
+
+			VendorItemEntity vendorItem = new VendorItemEntity();
+			vendorItem.setVendorPartNumber(formatter.formatCellValue(row.getCell(0)));
+			vendorItem.setItemNumber(formatter.formatCellValue(row.getCell(1)));
+			vendorItem.setItemName(formatter.formatCellValue(row.getCell(2)));
+			vendorItem.setCostPerItem(formatter.formatCellValue(row.getCell(3)));
+			vendorItem.setWeightCost(formatter.formatCellValue(row.getCell(4)));
+			vendorItem.setCaseCost(formatter.formatCellValue(row.getCell(5)));
+			vendorItem.setNumberOfItemsPerVendorCase(formatter.formatCellValue(row.getCell(6)));
+
+
+			vendorItem.setVendorNumber( vendorNumber );
+			vendorItem.setStoreID( "9999" );
+
+			vendorItems.add( vendorItem );
+			vendorItemRepository.save(vendorItem);
+		}
+
+		workbook.close();
+		return vendorItemModel;
+	}
+	@Transactional
+	public VendorItemModel updateVendorItems( VendorItemModel vendorItemModel, String vendorNumber ) {
+		vendorItemRepository.saveAll( vendorItemModel.getVendorItems() );
+		return vendorItemModel;
 	}
 
 }
