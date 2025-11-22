@@ -27,7 +27,6 @@ public class VendorItemEntity {
 	@Column(name = "ItemNum")
 	private String itemNumber;
 
-	@Id
 	@Column(name = "CreateDate")
 	private Date dateCreated;
 
@@ -49,6 +48,7 @@ public class VendorItemEntity {
 	@Column(name = "NumPerVenCase")
 	private String numberOfItemsPerVendorCase;
 
+	@Id
 	@Column(name = "Store_ID")
 	private String storeID;
 

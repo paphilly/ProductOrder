@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -63,8 +64,8 @@ public class VendorItemController {
 		return ApplicationUtils.buildOkResponse(responseModel);
 	}
 
-	@PutMapping("/updateVendorItems")
-	private ResponseEntity<ResponseModel> updateVendorInventory(@RequestParam("vendorItems") VendorItemModel vendorItemModel, @RequestParam("vendorNumber") String vendorNumber) {
+	@PutMapping(value = "/updateVendorItems" , consumes = "application/json")
+	private ResponseEntity<ResponseModel> updateVendorInventory( @RequestBody VendorItemModel vendorItemModel, @RequestParam("vendorNumber") String vendorNumber) {
 		ResponseModel responseModel = new ResponseModel();
 		try {
 			vendorItemModel = vendorItemService.updateVendorItems( vendorItemModel,vendorNumber );

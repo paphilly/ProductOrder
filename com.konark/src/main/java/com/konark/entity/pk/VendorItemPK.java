@@ -6,19 +6,20 @@ import java.util.Date;
 @SuppressWarnings("unused")
 public class VendorItemPK implements Serializable {
 
+	private String storeID;
+	private String itemNumber;
 	private String vendorNumber;
 	private String vendorPartNumber;
-	private String itemNumber;
-	private Date dateCreated;
 
 	public VendorItemPK() {
 
 	}
 
-	public VendorItemPK(String vendorNumber, String vendorPartNumber, String itemNumber, Date dateCreated) {
+	public VendorItemPK(String vendorNumber, String vendorPartNumber, String itemNumber, String storeID) {
 		this.vendorNumber = vendorNumber;
 		this.vendorPartNumber = vendorPartNumber;
 		this.itemNumber = itemNumber;
-		this.dateCreated = dateCreated;
+		this.storeID = storeID;
+
 	}
 }

@@ -53,8 +53,13 @@ public class VendorItemService {
 
 	public VendorItemModel getVendorItemsByVendorNumber(String vendorNumber) {
 
-		List<VendorItemEntity> vendorItems = vendorItemRepository.findByVendorNumber(vendorNumber);
-		vendorItems.forEach(vendorItemModel.getVendorItems()::add);
+		try {
+			List<VendorItemEntity> vendorItems = vendorItemRepository.findByVendorNumber( vendorNumber );
+			vendorItems.forEach( vendorItemModel.getVendorItems()::add );
+		} catch( Exception exception ){
+			exception.printStackTrace();
+			return null;
+		}
 		return vendorItemModel;
 	}
 
