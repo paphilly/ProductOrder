@@ -346,6 +346,14 @@ border-radius: 20px !important;
   background : #e4efab;
 }
 
+.upload-btn-rounded {
+  --oj-button-border-radius: 1.8em;
+}
+
+.upload-btn-rounded .oj-button-button {
+  border-radius: 1.8em !important;
+}
+
 
 /* ------------------------------------- */
 @font-face {

@@ -2,13 +2,18 @@ define([
 	'require',
 	'ojs/ojcore',
 	'knockout',
+	'jquery',
+	'appajax',
+	'appController',
 	'ojs/ojknockout',
 	'ojs/ojbutton',
 	"ojs/ojmessages",
 	"ojs/ojfilepicker",
-	"ojs/ojarraydataprovider"
+	"ojs/ojarraydataprovider",
+	"ojs/ojselectsingle",
+	"ojs/ojtable"
 ],
-	function (require, oj, ko) {
+	function (require, oj, ko, $, app, appController) {
 		function VendorManagementViewModel() {
 			var self = this;
 
@@ -24,6 +29,12 @@ define([
 			self.uploadInProgress = ko.observable(false);
 			self.uploadMessages = ko.observableArray([]);
 
+			self.vendorDP = ko.observable();
+			self.vendorSelectValue = ko.observable();
+			self.vendorItems = ko.observableArray([]);
+			self.vendorItemsLoading = ko.observable(false);
+			self.vendorItemsLoaded = ko.observable(false);
+
 			self.filePickerAccept = ['.xls', '.xlsx', '.csv'];
 
 			self.messagesDataprovider = ko.pureComputed(function () {
@@ -32,7 +43,72 @@ define([
 				});
 			});
 
+			self.vendorItemsColumns = [{
+				headerText: 'Vendor #',
+				field: 'vendorNumber'
+			}, {
+				headerText: 'Vendor Part #',
+				field: 'vendorPartNumber'
+			}, {
+				headerText: 'Item #',
+				field: 'itemNumber'
+			}, {
+				headerText: 'Date Created',
+				field: 'dateCreated'
+			}, {
+				headerText: 'Date Modified',
+				field: 'dateModified'
+			}, {
+				headerText: 'Item Name',
+				field: 'itemName'
+			}, {
+				headerText: 'Cost / Item',
+				field: 'costPerItem'
+			}, {
+				headerText: 'Weight Cost',
+				field: 'weightCost'
+			}, {
+				headerText: 'Case Cost',
+				field: 'caseCost'
+			}, {
+				headerText: '# Items / Case',
+				field: 'numberOfItemsPerVendorCase'
+			}, {
+				headerText: 'Store ID',
+				field: 'storeID'
+			}];
+
+			self.vendorItemsDataProvider = ko.pureComputed(function () {
+				return new oj.ArrayDataProvider(self.vendorItems(), {
+					keyAttributes: 'id'
+				});
+			});
+
+			self.isVendorSelected = ko.pureComputed(function () {
+				return !!self.vendorSelectValue();
+			});
+
+			self.resetUploadState = function () {
+				self.uploadMessages([]);
+				self.selectedFile(undefined);
+				self.selectedFileName('');
+				self.selectedFileSize('');
+				self.uploadStatus('');
+				self.uploadInProgress(false);
+			};
+
 			self.handleFileSelect = function (event) {
+				self.resetUploadState();
+				if (!self.isVendorSelected()) {
+					self.uploadMessages([{
+						id: 'upload-no-vendor',
+						severity: 'error',
+						summary: 'Select a vendor first',
+						detail: 'Choose a vendor to enable uploads.'
+					}]);
+					return;
+				}
+
 				self.uploadMessages([]);
 				var files = event.detail.files ? event.detail.files : (event.target.files || []);
 				if (!files || files.length === 0) {
@@ -72,6 +148,16 @@ define([
 
 			self.uploadFile = function () {
 				self.uploadMessages([]);
+				if (!self.isVendorSelected()) {
+					self.uploadMessages([{
+						id: 'upload-missing-vendor',
+						severity: 'error',
+						summary: 'No vendor selected',
+						detail: 'Select a vendor before uploading a file.'
+					}]);
+					return;
+				}
+
 				if (!self.selectedFile()) {
 					self.uploadMessages([{
 						id: 'upload-missing',
@@ -83,39 +169,148 @@ define([
 				}
 
 				self.uploadInProgress(true);
-				self.uploadStatus('Reading file...');
+				self.uploadStatus('Uploading...');
 
-				var reader = new FileReader();
-				reader.onload = function () {
-					self.uploadInProgress(false);
-					self.uploadStatus('Upload completed for ' + self.selectedFileName());
-					self.uploadMessages([{
-						id: 'upload-success',
-						severity: 'confirmation',
-						summary: 'File uploaded',
-						detail: 'Successfully processed ' + self.selectedFileName()
-					}]);
-				};
-				reader.onerror = function () {
-					self.uploadInProgress(false);
-					self.uploadStatus('Upload failed');
-					self.uploadMessages([{
-						id: 'upload-failed',
-						severity: 'error',
-						summary: 'Upload failed',
-						detail: 'Could not read the file. Try again.'
-					}]);
-				};
+				var formData = new FormData();
+				formData.append("file", self.selectedFile());
+				formData.append("vendorNumber", String(self.vendorSelectValue()));
 
-				reader.readAsArrayBuffer(self.selectedFile());
+				var apiURL = appController.serviceURL("vendorItems/upload");
+
+				$.ajax({
+					url: apiURL,
+					type: "POST",
+					data: formData,
+					contentType: false,
+					processData: false,
+					beforeSend: function (xhr) {
+						xhr.setRequestHeader('jSessionIDHeader', sessionStorage.getItem('jSessionIDHeader'));
+					},
+					success: function (response) {
+						var uploadedItems = [];
+						var uploadedFileName = self.selectedFileName();
+						if (response && response.data && response.data.VendorItemModel && response.data.VendorItemModel.vendorItems) {
+							uploadedItems = normalizeVendorItems(response.data.VendorItemModel.vendorItems);
+						}
+
+						var merged = mergeUniqueVendorPartNumbers(self.vendorItems(), uploadedItems, self.vendorSelectValue());
+						self.vendorItems(merged);
+						self.vendorItemsLoaded(true);
+						self.vendorItemsLoading(false);
+
+						self.uploadInProgress(false);
+						self.uploadStatus('Upload completed');
+						self.selectedFile(undefined);
+						self.selectedFileName('');
+						self.selectedFileSize('');
+						self.uploadMessages([{
+							id: 'upload-success',
+							severity: 'confirmation',
+							summary: 'File uploaded',
+							detail: uploadedItems.length > 0 ? ('Added ' + uploadedItems.length + ' new items for vendor ' + self.vendorSelectValue()) : ('Successfully processed ' + uploadedFileName)
+						}]);
+					},
+					error: function (jqXHR) {
+						self.uploadInProgress(false);
+						self.uploadStatus('Upload failed');
+						self.uploadMessages([{
+							id: 'upload-failed',
+							severity: 'error',
+							summary: 'Upload failed',
+							detail: (jqXHR && jqXHR.responseText) ? jqXHR.responseText : 'Could not upload the file. Try again.'
+						}]);
+					}
+				});
 			};
 
 			self.canUpload = ko.pureComputed(function () {
-				return !!self.selectedFile() && !self.uploadInProgress();
+				return !!self.selectedFile() && !self.uploadInProgress() && self.isVendorSelected();
 			});
 
-			self.loadingStatus.isBusy(false);
-			self.loadingStatus.isLoaded(true);
+			self.vendorValueActionHandler = function (event) {
+				var vendorNumber = event.detail.value;
+				self.vendorSelectValue(vendorNumber);
+				self.resetUploadState();
+				self.loadVendorItems(vendorNumber);
+			};
+
+			self.loadVendors = function () {
+				var apiURL = appController.serviceURL("vendors");
+				app.ajax("GET", apiURL, function (responseModel) {
+					self.vendorDP(new oj.ArrayDataProvider(buildVendors(responseModel.data.VendorModel.vendors), {
+						keyAttributes: "value"
+					}));
+					self.loadingStatus.isBusy(false);
+					self.loadingStatus.isLoaded(true);
+				}, "", "", "application/json");
+			};
+
+			self.loadVendorItems = function (vendorNumber) {
+				if (!vendorNumber) {
+					self.vendorItems([]);
+					self.vendorItemsLoaded(false);
+					return;
+				}
+				self.vendorItemsLoading(true);
+				self.vendorItemsLoaded(false);
+
+				var apiURL = appController.serviceURL("vendorItems/" + vendorNumber);
+				app.ajax("GET", apiURL, function (responseModel) {
+					var items = [];
+					if (responseModel && responseModel.data && responseModel.data.VendorItemModel && responseModel.data.VendorItemModel.vendorItems) {
+						items = responseModel.data.VendorItemModel.vendorItems.map(function (item) {
+							return Object.assign({
+								id: item.vendorNumber + "-" + item.vendorPartNumber + "-" + item.itemNumber
+							}, item);
+						});
+					}
+					self.vendorItems(items);
+					self.vendorItemsLoading(false);
+					self.vendorItemsLoaded(true);
+				}, "", "", "application/json");
+			};
+
+			function buildVendors(input) {
+				var dataArray = [];
+				for (var i = 0; i < input.length; i++) {
+					dataArray.push({
+						"value": input[i].vendorNumber,
+						"label": input[i].company
+					});
+				}
+				return dataArray.sort(function (a, b) {
+					return a.label > b.label ? 1 : (b.label > a.label ? -1 : 0);
+				});
+			}
+
+			function normalizeVendorItems(items) {
+				return items.map(function (item) {
+					return Object.assign({
+						id: item.vendorNumber + "-" + item.vendorPartNumber + "-" + item.itemNumber
+					}, item);
+				});
+			}
+
+			function mergeUniqueVendorPartNumbers(existingItems, newItems, vendorNumber) {
+				var merged = existingItems ? existingItems.slice() : [];
+				var existingPartNumbers = new Set(merged.filter(function (it) {
+					return it.vendorNumber === vendorNumber;
+				}).map(function (it) {
+					return it.vendorPartNumber;
+				}));
+
+				for (var i = 0; i < newItems.length; i++) {
+					var item = newItems[i];
+					if (item.vendorNumber === vendorNumber && !existingPartNumbers.has(item.vendorPartNumber)) {
+						merged.push(item);
+						existingPartNumbers.add(item.vendorPartNumber);
+					}
+				}
+
+				return merged;
+			}
+
+			self.loadVendors();
 		}
 
 		return VendorManagementViewModel;

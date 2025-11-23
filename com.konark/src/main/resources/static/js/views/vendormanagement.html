@@ -1,25 +1,65 @@
 <img data-bind='visible: loadingStatus.isBusy()' class="loading-img" style="width: 9em;" src="./css/images/loading.gif"/>
 <oj-bind-if test="[[loadingStatus.isLoaded()]]">
     <div class="oj-panel kn-oj-panel-border2px">
-        <div class="oj-typography-semi-bold oj-text-color-primary oj-sm-padding-1x-bottom">Upload vendor sheet</div>
-        <div class="oj-flex">
-            <div class="oj-flex-item oj-sm-12 oj-md-4 oj-lg-4">
-                <oj-file-picker accept="[[filePickerAccept]]"
-                                selection-mode="single"
-                                on-oj-select="[[handleFileSelect]]">
-                </oj-file-picker>
+        <div class="oj-flex oj-sm-flex-items-initial oj-sm-padding-1x-bottom">
+            <div class="oj-flex-item oj-sm-12 oj-md-4 oj-lg-4 oj-sm-padding-1x-end">
+                <div class="oj-typography-semi-bold oj-text-color-primary oj-sm-padding-1x-bottom">Vendor</div>
+                <oj-select-single id="vendorSelect"
+                                  class="kn-dropdown-icon-color"
+                                  data="[[vendorDP]]"
+                                  placeholder="Select a Vendor from the list..."
+                                  on-oj-value-action="[[vendorValueActionHandler]]"
+                                  value="{{vendorSelectValue}}"
+                                  style="max-width: 26em;">
+                </oj-select-single>
             </div>
-            <div class="oj-flex-item oj-sm-12 oj-md-8 oj-lg-8 oj-sm-padding-1x-top">
+            <oj-bind-if test="[[isVendorSelected()]]">
+                <div class="oj-flex-item oj-sm-12 oj-md-4 oj-lg-4">
+                    <div class="oj-typography-semi-bold oj-text-color-primary oj-sm-padding-1x-bottom">Upload vendor sheet</div>
+                    <oj-file-picker accept="[[filePickerAccept]]"
+                                    selection-mode="single"
+                                    select-on="click"
+                                    disabled="[[!isVendorSelected()]]"
+                                    on-oj-select="[[handleFileSelect]]">
+                        <oj-button slot="trigger" chroming="callToAction" disabled="[[!isVendorSelected()]]" style="min-width: 26em; max-width: 26em;">
+                            Choose file
+                        </oj-button>
+                    </oj-file-picker>
+                    <oj-button chroming="outlined"
+                               class="upload-btn-rounded"
+                               on-oj-action="[[uploadFile]]"
+                               disabled="[[!canUpload() || uploadInProgress()]]">
+                        Upload file
+                    </oj-button>
+                </div>
+                <div class="oj-flex-item oj-sm-12 oj-md-4 oj-lg-4 oj-sm-padding-1x-top">
+                    
+                </div>
+            </oj-bind-if>
+        </div>
+        <!-- <oj-bind-if test="[[isVendorSelected()]]">
+            <div class="oj-sm-padding-1x-top">
                 <div class="oj-typography-body-md oj-typography-semi-bold"><oj-bind-text value="[[selectedFileName]]"></oj-bind-text></div>
                 <div class="oj-typography-body-sm oj-text-color-secondary"><oj-bind-text value="[[selectedFileSize]]"></oj-bind-text></div>
                 <div class="oj-typography-body-sm oj-text-color-secondary"><oj-bind-text value="[[uploadStatus]]"></oj-bind-text></div>
-                <div class="oj-sm-padding-1x-top">
-                    <oj-button chroming="callToAction" on-oj-action="[[uploadFile]]" disabled="[[!canUpload() || uploadInProgress()]]">Upload file</oj-button>
-                </div>
             </div>
+            <oj-bind-if test="[[uploadMessages().length > 0]]">
+                <oj-messages class="oj-sm-margin-1x-top" messages="[[messagesDataprovider]]" display-options.category="none"></oj-messages>
+            </oj-bind-if>
+        </oj-bind-if> -->
+        <div class="oj-sm-padding-1x-top">
+            <oj-bind-if test="[[vendorItemsLoading()]]">
+                <img style="width: 6em;" src="./css/images/loading.gif"/>
+            </oj-bind-if>
+            <oj-bind-if test="[[vendorItemsLoaded()]]">
+                <oj-table id='vendor-items-table' aria-label='Vendor Items Table'
+                          class="oj-sm-width-full"
+                          data='[[vendorItemsDataProvider]]'
+                          columns='[[vendorItemsColumns]]'
+                          display='grid'
+                          style='width: 99%; max-height : 500px;'>
+                </oj-table>
+            </oj-bind-if>
         </div>
-        <oj-bind-if test="[[uploadMessages().length > 0]]">
-            <oj-messages class="oj-sm-margin-1x-top" messages="[[messagesDataprovider]]" display-options.category="none"></oj-messages>
-        </oj-bind-if>
     </div>
 </oj-bind-if>

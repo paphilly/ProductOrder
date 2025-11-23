@@ -564,7 +564,7 @@ define(['require', 'ojs/ojcore', 'knockout', 'knockout', 'ojs/ojrouter', 'appCon
                     showMessages("confirmation", "Order '" + responseModel.data.productOrderID + "' is placed" );
                     self.productOrderLoading(false);
                     self.showMessage(true);
-                    self.isReviewOrder(false);
+                    resetProductTableToVendorItems();
                 }, knockoutMap.toJSON(postModel), 'JSON', 'application/json');
             };
 
@@ -600,6 +600,24 @@ define(['require', 'ojs/ojcore', 'knockout', 'knockout', 'ojs/ojrouter', 'appCon
                 self.isProductTableLoad(false);
                 self.isProductTableLoadisBusy(true);
                 self.productTableDataproviderToSort = new oj.ArrayDataProvider(self.productDetailsToPost());
+                self.productTableDataprovider = new oj.ListDataProviderView(self.productTableDataproviderToSort, {
+                    sortCriteria: [{
+                        attribute: "vendorItemName",
+                        direction: "ascending"
+                    }],
+                });
+
+                self.isProductTableLoad(true);
+                self.isProductTableLoadisBusy(false);
+            }
+
+            function resetProductTableToVendorItems() {
+                self.isReviewOrder(false);
+                self.productDetailsToPost([]);
+                self.orderTotalValue(0);
+                self.isProductTableLoad(false);
+                self.isProductTableLoadisBusy(true);
+                self.productTableDataproviderToSort = new oj.ArrayDataProvider(self.vendorItemsDataBackup());
                 self.productTableDataprovider = new oj.ListDataProviderView(self.productTableDataproviderToSort, {
                     sortCriteria: [{
                         attribute: "vendorItemName",
