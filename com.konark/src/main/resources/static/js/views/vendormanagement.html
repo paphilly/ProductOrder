@@ -1,0 +1,25 @@
+<img data-bind='visible: loadingStatus.isBusy()' class="loading-img" style="width: 9em;" src="./css/images/loading.gif"/>
+<oj-bind-if test="[[loadingStatus.isLoaded()]]">
+    <div class="oj-panel kn-oj-panel-border2px">
+        <div class="oj-typography-semi-bold oj-text-color-primary oj-sm-padding-1x-bottom">Upload vendor sheet</div>
+        <div class="oj-flex">
+            <div class="oj-flex-item oj-sm-12 oj-md-4 oj-lg-4">
+                <oj-file-picker accept="[[filePickerAccept]]"
+                                selection-mode="single"
+                                on-oj-select="[[handleFileSelect]]">
+                </oj-file-picker>
+            </div>
+            <div class="oj-flex-item oj-sm-12 oj-md-8 oj-lg-8 oj-sm-padding-1x-top">
+                <div class="oj-typography-body-md oj-typography-semi-bold"><oj-bind-text value="[[selectedFileName]]"></oj-bind-text></div>
+                <div class="oj-typography-body-sm oj-text-color-secondary"><oj-bind-text value="[[selectedFileSize]]"></oj-bind-text></div>
+                <div class="oj-typography-body-sm oj-text-color-secondary"><oj-bind-text value="[[uploadStatus]]"></oj-bind-text></div>
+                <div class="oj-sm-padding-1x-top">
+                    <oj-button chroming="callToAction" on-oj-action="[[uploadFile]]" disabled="[[!canUpload() || uploadInProgress()]]">Upload file</oj-button>
+                </div>
+            </div>
+        </div>
+        <oj-bind-if test="[[uploadMessages().length > 0]]">
+            <oj-messages class="oj-sm-margin-1x-top" messages="[[messagesDataprovider]]" display-options.category="none"></oj-messages>
+        </oj-bind-if>
+    </div>
+</oj-bind-if>

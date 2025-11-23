@@ -8,6 +8,10 @@ define(['knockout', 'ojs/ojmodule-element-utils', 'ojs/ojknockouttemplateutils',
 		function ControllerViewModel() {
 			var self = this;
 
+			// Optional override for the API base URL. Set window.APIBaseUrl to use a custom base; fallback to browser-derived URL otherwise.
+			const APIBaseUrl = "http://localhost:8080/";
+			var configuredApiBaseUrl = normalizeBaseUrl(APIBaseUrl ?? window.APIBaseUrl);
+
 
 			self.initials = ko.observable();
 			self.appName = ko.observable();
@@ -49,6 +53,9 @@ define(['knockout', 'ojs/ojmodule-element-utils', 'ojs/ojknockouttemplateutils',
 
 				'Gift Card': {
 					label: 'Gift Card'
+				},
+				'Vendor Management': {
+					label: 'Vendor Management'
 				}
 			});
 			Router.defaults['urlAdapter'] = new Router.urlParamAdapter();
@@ -112,13 +119,21 @@ define(['knockout', 'ojs/ojmodule-element-utils', 'ojs/ojknockouttemplateutils',
 				return baseURI;
 			}
 
+			function normalizeBaseUrl(url) {
+				if (!url) {
+					return null;
+				}
+				return url.endsWith("/") ? url : url.concat("/");
+			}
+
 			// Build URL
 			self.serviceURL = function (serviceName, params) {
+				var baseUrl = configuredApiBaseUrl || baseServiceURI();
 
 				if (!params && serviceName) {
-					return baseServiceURI().concat(serviceName);
+					return baseUrl.concat(serviceName);
 				} else if (params && serviceName) {
-					return baseServiceURI().concat(serviceName).concat("?").concat($.param(params));
+					return baseUrl.concat(serviceName).concat("?").concat($.param(params));
 				} else {
 					return undefined;
 				}
@@ -126,7 +141,9 @@ define(['knockout', 'ojs/ojmodule-element-utils', 'ojs/ojknockouttemplateutils',
 
 			self.tabsDataProvider = ko.observable([]);
 			if (localStorage.getItem('pages')) {
-				self.tabsDataProvider(new oj.ArrayDataProvider(JSON.parse(localStorage.getItem('pages')), {
+				var storedPages = ensureVendorPage(JSON.parse(localStorage.getItem('pages')));
+				localStorage.setItem('pages', JSON.stringify(storedPages));
+				self.tabsDataProvider(new oj.ArrayDataProvider(storedPages, {
 					keyAttributes: "id"
 				}));
 			}
@@ -136,6 +153,7 @@ define(['knockout', 'ojs/ojmodule-element-utils', 'ojs/ojknockouttemplateutils',
 			self.configureScreens = function (inputData) {
 				self.tabsDataProvider = ko.observableArray([]);
 				var data = buildScreens(inputData.pages);
+				data = ensureVendorPage(data);
 				localStorage.setItem('pages', JSON.stringify(data));
 				self.tabsDataProvider(new oj.ArrayDataProvider(data, {
 					keyAttributes: "id"
@@ -153,7 +171,20 @@ define(['knockout', 'ojs/ojmodule-element-utils', 'ojs/ojknockouttemplateutils',
 						id: inputData[a]
 					});
 				}
-				return dataArray;
+				return ensureVendorPage(dataArray);
+			}
+
+			function ensureVendorPage(pages) {
+				var exists = pages.some(function (item) {
+					return item.name === 'Vendor Management' || item.id === 'Vendor Management';
+				});
+				if (!exists) {
+					pages.push({
+						name: 'Vendor Management',
+						id: 'Vendor Management'
+					});
+				}
+				return pages;
 
 			}
 
