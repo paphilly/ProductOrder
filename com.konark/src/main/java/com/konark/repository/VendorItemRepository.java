@@ -15,6 +15,8 @@ public interface VendorItemRepository extends CrudRepository<VendorItemEntity, V
 	@Query(value = "SELECT * FROM SW_VendorItems v WHERE v.Vendor_Number = :vendorNumber", nativeQuery = true)
 	List<VendorItemEntity> findVendorItemsByVendorNumber(@Param("vendorNumber") String vendorNumber);
 
+	List<VendorItemEntity> findByVendorNumber(String vendorNumber);
+
 	Iterable<VendorItemEntity> findByItemNameContainingAndVendorNumberNotIn(String itemName, List<String> vendorNumber);
 	
 	List<VendorItemEntity> findByVendorNumberNotIn(List<String> vendorNumber);
@@ -132,7 +134,7 @@ List<VendorInventoryProjection> findReferenceVendorItems(
         "JOIN Departments department ON department.Dept_ID = inventory.Dept_ID " +
         "WHERE invVend.Vendor_Number = :vendorNumber",
 nativeQuery = true)
-List<VendorInventoryProjection> findByVendorNumber(@Param("vendorNumber") String vendorNumber
+List<VendorInventoryProjection> findItemsByVendorNumber( @Param("vendorNumber") String vendorNumber
 );
 
 }

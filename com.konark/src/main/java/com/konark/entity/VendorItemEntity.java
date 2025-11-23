@@ -11,7 +11,7 @@ import javax.persistence.Table;
 import com.konark.entity.pk.VendorItemPK;
 
 @Entity
-@Table(name = "SW_VendorItems")
+@Table(name = "Inventory_Vendors_v1")
 @IdClass(VendorItemPK.class)
 public class VendorItemEntity {
 
@@ -27,50 +27,44 @@ public class VendorItemEntity {
 	@Column(name = "ItemNum")
 	private String itemNumber;
 
-	@Id
-	@Column(name = "Date_Created")
+	@Column(name = "CreateDate")
 	private Date dateCreated;
+
+	@Column(name = "ModifiedDate")
+	private Date dateModified;
 
 	@Column(name = "ItemName")
 	private String itemName;
 
-	@Column(name = "Dept_ID")
-	private String departmentID;
-
 	@Column(name = "CostPer")
 	private String costPerItem;
-	
 
-	@Column(name = "vendorItemName")
-	private String vendorItemName;
+	@Column(name = "WeightCost")
+	private String weightCost;
 
 	@Column(name = "Case_Cost")
 	private String caseCost;
-	
-	@Column(name = "UnitMeasure")
-	private String unitMeasure;
 
 	@Column(name = "NumPerVenCase")
 	private String numberOfItemsPerVendorCase;
-	
-	@Column(name = "vendorDept")
-	private String department;
-	
-	
-	public String getDepartment() {
-		return department;
+
+	@Id
+	@Column(name = "Store_ID")
+	private String storeID;
+
+	public String getWeightCost() {
+
+		return weightCost;
 	}
 
-	public void setDepartment(String department) {
-		this.department = department;
+	public Date getDateModified() {
+
+		return dateModified;
 	}
 
-	public String getVendorItemName() {
-		return vendorItemName;
-	}
+	public String getStoreID() {
 
-	public void setVendorItemName(String vendorItemName) {
-		this.vendorItemName = vendorItemName;
+		return storeID;
 	}
 
 	public String getCaseCost() {
@@ -137,14 +131,6 @@ public class VendorItemEntity {
 		this.costPerItem = costPerItem;
 	}
 
-	public String getUnitMeasure() {
-		return unitMeasure;
-	}
-
-	public void setUnitMeasure(String unitMeasure) {
-		this.unitMeasure = unitMeasure;
-	}
-
 	public String getNumberOfItemsPerVendorCase() {
 		return numberOfItemsPerVendorCase;
 	}
@@ -153,4 +139,18 @@ public class VendorItemEntity {
 		this.numberOfItemsPerVendorCase = numberOfItemsPerVendorCase;
 	}
 
+	public void setWeightCost( String weightCost ) {
+
+		this.weightCost = weightCost;
+	}
+
+	public void setDateModified( Date dateModified ) {
+
+		this.dateModified = dateModified;
+	}
+
+	public void setStoreID( String storeID ) {
+
+		this.storeID = storeID;
+	}
 }
