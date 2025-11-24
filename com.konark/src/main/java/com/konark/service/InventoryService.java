@@ -59,7 +59,7 @@ public class InventoryService {
 		// inventoryRepository.findByItemNameContainingAndStoreID(searchWord.toString(),
 		// storeID);
 
-		List<InventoryEntity> inventory = inventoryRepository.findAll();
+		List<InventoryEntity> inventory = inventoryRepository.findAllByStoreID(storeID);
 
 		Iterable<InventoryEntity> inventorySearchResults = LevenshteinItemSearch
 				.findSimilarItemsByLevenshtein(productName, inventory);

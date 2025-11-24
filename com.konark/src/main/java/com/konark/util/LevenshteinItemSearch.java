@@ -28,7 +28,9 @@ public class LevenshteinItemSearch {
             }
 
             // Set a threshold for similarity (adjust as needed)
-            if (totalDistance <= 5 && !selectedName.equals(itemName)) {  // Avoid returning the selected item itself
+            if (totalDistance <= 5
+              //  && !selectedName.equals(itemName)
+            ) {  // Avoid returning the selected item itself
                 similarItems.add(inventoryItem);
             }
         }        
