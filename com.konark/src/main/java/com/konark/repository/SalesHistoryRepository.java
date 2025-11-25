@@ -20,7 +20,7 @@ public interface SalesHistoryRepository extends CrudRepository<InvoiceItemizedEn
 	
 	  
 	  @Query(value ="  SELECT CAST(ModifiedDate AS DATE) as DateField, SUM(PricePer*Quantity) as SaleAmount \r\n"
-	  				+ "	  FROM Invoice_Itemized_v1 where Store_ID = :storeID \r\n"
+	  				+ "	  FROM vw_AllInvoiceItemized where Store_ID = :storeID \r\n"
 	  					+ "	  GROUP BY CAST(ModifiedDate AS DATE) order by DateField desc", nativeQuery = true)
 	  List<Object[]> getTotalSaleByStoreID(String storeID);
 }
