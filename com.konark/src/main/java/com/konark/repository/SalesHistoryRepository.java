@@ -13,7 +13,7 @@ public interface SalesHistoryRepository extends CrudRepository<InvoiceItemizedEn
 	@Query(value ="SELECT itemNum, ItemNum AS ITEMNAME, SUM(CASE WHEN ModifiedDate BETWEEN DATEADD(DAY, -7, GETDATE()) and  GETDATE() THEN Quantity ELSE 0 END) AS seven, 	"
 			+ "SUM(CASE WHEN ModifiedDate BETWEEN DATEADD(DAY, -15, GETDATE()) and  GETDATE() THEN Quantity ELSE 0 END) AS fifteen, "
 			+ "SUM(CASE WHEN ModifiedDate BETWEEN DATEADD(DAY, -30, GETDATE()) and  GETDATE() THEN Quantity ELSE 0 END) AS thirty "
-			+ "FROM invoice_itemized_v1 invoice where invoice.itemNum = :itemNumber AND Store_ID=:storeID  "
+			+ "FROM vw_AllInvoiceItemized invoice where invoice.itemNum = :itemNumber AND Store_ID=:storeID  "
 			+ "GROUP BY itemNum ORDER BY 2 DESC", nativeQuery = true)
 	List<Object[]> findSalesHistoryByItemNumberAndStore(String itemNumber, String storeID);
 
