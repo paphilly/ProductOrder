@@ -20,10 +20,12 @@ public interface InventoryRepository extends CrudRepository<InventoryEntity, Inv
 	List<InventoryEntity> findByItemNameContainingAndStoreID(String itemName, String storeID);
 	
 	List<InventoryEntity> findAll();
+
+	List<InventoryEntity> findAllByStoreID(String storeID);
 	
 	List<InventoryEntity> findByItemNumberContainingAndStoreID(String itemNumber, String storeID);
 
-	@Query(value = "SELECT * FROM Inventory i WHERE i.Vendor_Number= :vendorNumber AND i.Store_ID= :storeID", nativeQuery = true)
+	@Query(value = "SELECT * FROM vw_AllInventory i WHERE i.Vendor_Number= :vendorNumber AND i.Store_ID= :storeID", nativeQuery = true)
 	List<InventoryEntity> findStoreInventoryByVendorNumber(@Param("vendorNumber") String vendorNumber, @Param("storeID") String storeID);
 
 }

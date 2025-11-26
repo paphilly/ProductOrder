@@ -11,7 +11,7 @@ import javax.persistence.Table;
 import com.konark.entity.pk.InventoryPK;
 
 @Entity
-@Table(name = "Inventory")
+@Table(name = "vw_AllInventory")
 @IdClass(InventoryPK.class)
 public class InventoryEntity {
 

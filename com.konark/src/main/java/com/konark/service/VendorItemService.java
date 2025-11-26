@@ -179,7 +179,7 @@ public class VendorItemService {
 
 			});
 			
-			Iterable<InventoryEntity> inventoryResults = inventoryRepository.findStoreInventoryByVendorNumber(vendorNumber,	"9999");
+			Iterable<InventoryEntity> inventoryResults = inventoryRepository.findStoreInventoryByVendorNumber(vendorNumber,	storeID);
 
 			for (InventoryEntity inventoryItem : inventoryResults) {
 				for (ProductItemModel vendorItem : vendorItems) {
