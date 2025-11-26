@@ -44,21 +44,12 @@ define([
 			});
 
 			self.vendorItemsColumns = [{
-				headerText: 'Vendor #',
-				field: 'vendorNumber'
-			}, {
 				headerText: 'Vendor Part #',
 				field: 'vendorPartNumber'
 			}, {
 				headerText: 'Item #',
 				field: 'itemNumber'
-			}, {
-				headerText: 'Date Created',
-				field: 'dateCreated'
-			}, {
-				headerText: 'Date Modified',
-				field: 'dateModified'
-			}, {
+			},  {
 				headerText: 'Item Name',
 				field: 'itemName'
 			}, {
@@ -73,9 +64,6 @@ define([
 			}, {
 				headerText: '# Items / Case',
 				field: 'numberOfItemsPerVendorCase'
-			}, {
-				headerText: 'Store ID',
-				field: 'storeID'
 			}];
 
 			self.vendorItemsDataProvider = ko.pureComputed(function () {
