@@ -20,7 +20,8 @@ public interface VendorItemRepository extends CrudRepository<VendorItemEntity, V
 	Iterable<VendorItemEntity> findByItemNameContainingAndVendorNumberNotIn(String itemName, List<String> vendorNumber);
 	
 	List<VendorItemEntity> findByVendorNumberNotIn(List<String> vendorNumber);
-	
+
+	@Query(value = "SELECT * FROM Inventory_Vendors  invVendors WHERE invVendors.Vendor_Number <> :vendorNumber AND invVendors.ItemNum = :itemNumber", nativeQuery = true)
 	Iterable<VendorItemEntity> findByItemNumberContainingAndVendorNumberNotIn(String itemNumber, List<String> vendorNumber);
 	
 	/*@Query(value = "SELECT DISTINCT vendorDept FROM SW_VendorItems v WHERE v.Vendor_Number = :vendorNumber", nativeQuery = true)

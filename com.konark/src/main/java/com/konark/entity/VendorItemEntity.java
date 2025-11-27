@@ -23,9 +23,11 @@ public class VendorItemEntity {
 	@Column(name = "Vendor_Part_Num")
 	private String vendorPartNumber;
 
-	@Id
-	@Column(name = "ItemNum")
-	private String itemNumber;
+	@Column(name = "Category")
+	private String category;
+
+	@Column(name = "UPC_Code")
+	private String upcCode;
 
 	@Column(name = "CreateDate")
 	private Date dateCreated;
@@ -48,9 +50,6 @@ public class VendorItemEntity {
 	@Column(name = "NumPerVenCase")
 	private String numberOfItemsPerVendorCase;
 
-	@Id
-	@Column(name = "Store_ID")
-	private String storeID;
 
 	public String getWeightCost() {
 
@@ -60,11 +59,6 @@ public class VendorItemEntity {
 	public Date getDateModified() {
 
 		return dateModified;
-	}
-
-	public String getStoreID() {
-
-		return storeID;
 	}
 
 	public String getCaseCost() {
@@ -89,14 +83,6 @@ public class VendorItemEntity {
 
 	public void setVendorPartNumber(String vendorPartNumber) {
 		this.vendorPartNumber = vendorPartNumber;
-	}
-
-	public String getItemNumber() {
-		return itemNumber;
-	}
-
-	public void setItemNumber(String itemNumber) {
-		this.itemNumber = itemNumber;
 	}
 
 	public Date getDateCreated() {
@@ -149,8 +135,24 @@ public class VendorItemEntity {
 		this.dateModified = dateModified;
 	}
 
-	public void setStoreID( String storeID ) {
+	public String getCategory() {
 
-		this.storeID = storeID;
+		return category;
+	}
+
+	public void setCategory( String category ) {
+
+		this.category = category;
+	}
+
+
+	public String getUpcCode() {
+
+		return upcCode;
+	}
+
+	public void setUpcCode( String upcCode ) {
+
+		this.upcCode = upcCode;
 	}
 }

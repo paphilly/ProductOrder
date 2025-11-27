@@ -16,4 +16,5 @@ public interface VendorInventoryProjection {
     String getInStock();
     String getDeptId();
     String getDescription();
+    String getCategory();
 }

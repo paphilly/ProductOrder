@@ -36,6 +36,9 @@ public class ProductItemModel {
 
 	private String vendorItemName;
 
+
+	private String category;
+
 	private BigDecimal itemTotal;
 
 	private boolean inventoryFlag = false;
@@ -160,5 +163,16 @@ public class ProductItemModel {
 	public void setItemTotal(BigDecimal itemTotal) {
 		this.itemTotal = itemTotal;
 	}
+
+	public String getCategory() {
+
+		return category;
+	}
+
+	public void setCategory( String category ) {
+
+		this.category = category;
+	}
+
 
 }

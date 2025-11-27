@@ -57,6 +57,7 @@ public class ProductOrderService {
 			productOrderItem.setItemName(productItemModel.getItemName());
 			productOrderItem.setItemNumber(productItemModel.getItemNumber());
 			productOrderItem.setVendorPartNumber(productItemModel.getVendorPartNumber());
+
 			productOrderItem.setQuantityOrdered(productItemModel.getQuantityOrdered());
 			productOrderItem.setProductOrderEntity(newProductOrder);
 
