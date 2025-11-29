@@ -58,7 +58,81 @@
                           columns='[[vendorItemsColumns]]'
                           display='grid'
                           style='width: 99%; max-height : 500px;'>
+                    <template slot="rowTemplate" data-oj-as="row">
+                        <tr>
+                            <td>
+                                <oj-bind-text value="[[row.data.vendorPartNumber]]"></oj-bind-text>
+                            </td>
+                            <td>
+                                <oj-bind-text value="[[row.data.itemNumber]]"></oj-bind-text>
+                            </td>
+                            <td>
+                                <oj-input-text :id="[['item-name-' + row.data.id]]"
+                                               value="{{row.data.itemName}}"
+                                               required="true"
+                                               placeholder="Enter item name"
+                                               class="oj-sm-width-full">
+                                </oj-input-text>
+                            </td>
+                            <td>
+                                <oj-input-number :id="[['cost-per-item-' + row.data.id]]"
+                                                 value="{{row.data.costPerItem}}"
+                                                 min="0"
+                                                 step="0.01"
+                                                 required="true"
+                                                 class="oj-sm-width-full"
+                                                 style="max-width: 9em;">
+                                </oj-input-number>
+                            </td>
+                            <td>
+                                <oj-input-number :id="[['weight-cost-' + row.data.id]]"
+                                                 value="{{row.data.weightCost}}"
+                                                 min="0"
+                                                 step="0.01"
+                                                 required="true"
+                                                 class="oj-sm-width-full"
+                                                 style="max-width: 9em;">
+                                </oj-input-number>
+                            </td>
+                            <td>
+                                <oj-input-number :id="[['case-cost-' + row.data.id]]"
+                                                 value="{{row.data.caseCost}}"
+                                                 min="0"
+                                                 step="0.01"
+                                                 required="true"
+                                                 class="oj-sm-width-full"
+                                                 style="max-width: 9em;">
+                                </oj-input-number>
+                            </td>
+                            <td>
+                                <oj-input-number :id="[['items-per-case-' + row.data.id]]"
+                                                 value="{{row.data.numberOfItemsPerVendorCase}}"
+                                                 min="1"
+                                                 step="1"
+                                                 required="true"
+                                                 class="oj-sm-width-full"
+                                                 style="max-width: 8em;">
+                                </oj-input-number>
+                            </td>
+                        </tr>
+                    </template>
                 </oj-table>
+                <div class="oj-sm-margin-1x-top">
+                    <oj-messages class="oj-sm-margin-1x-bottom" messages="[[tableMessagesDataprovider]]" display-options.category="none"></oj-messages>
+                    <div class="oj-flex oj-sm-justify-content-flex-end oj-sm-padding-1x-top">
+                        <oj-button chroming="outlined"
+                                   on-oj-action="[[resetVendorItems]]"
+                                   disabled="[[!canResetVendorItems()]]">
+                            Reset
+                        </oj-button>
+                        <oj-button chroming="callToAction"
+                                   class="oj-sm-margin-1x-start"
+                                   on-oj-action="[[saveVendorItems]]"
+                                   disabled="[[!canSaveVendorItems()]]">
+                            Save
+                        </oj-button>
+                    </div>
+                </div>
             </oj-bind-if>
         </div>
     </div>
