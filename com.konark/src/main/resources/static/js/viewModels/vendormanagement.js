@@ -11,9 +11,7 @@ define([
 	"ojs/ojfilepicker",
 	"ojs/ojarraydataprovider",
 	"ojs/ojselectsingle",
-	"ojs/ojtable",
-	"ojs/ojinputtext",
-	"ojs/ojinputnumber"
+	"ojs/ojtable"
 ],
 	function (require, oj, ko, $, app, appController) {
 		function VendorManagementViewModel() {
@@ -34,22 +32,15 @@ define([
 			self.vendorDP = ko.observable();
 			self.vendorSelectValue = ko.observable();
 			self.vendorItems = ko.observableArray([]);
-			self.vendorItemsOriginal = ko.observableArray([]);
+			self.categoryFilterValue = ko.observable();
+			self.categoryOptions = ko.observableArray([]);
 			self.vendorItemsLoading = ko.observable(false);
 			self.vendorItemsLoaded = ko.observable(false);
-			self.tableMessages = ko.observableArray([]);
-			self.isSavingVendorItems = ko.observable(false);
 
 			self.filePickerAccept = ['.xls', '.xlsx', '.csv'];
 
 			self.messagesDataprovider = ko.pureComputed(function () {
 				return new oj.ArrayDataProvider(self.uploadMessages(), {
-					keyAttributes: 'id'
-				});
-			});
-
-			self.tableMessagesDataprovider = ko.pureComputed(function () {
-				return new oj.ArrayDataProvider(self.tableMessages(), {
 					keyAttributes: 'id'
 				});
 			});
@@ -60,9 +51,12 @@ define([
 			}, {
 				headerText: 'Item #',
 				field: 'itemNumber'
-			},  {
+			}, {
 				headerText: 'Item Name',
 				field: 'itemName'
+			}, {
+				headerText: 'Category',
+				field: 'category'
 			}, {
 				headerText: 'Cost / Item',
 				field: 'costPerItem'
@@ -77,8 +71,26 @@ define([
 				field: 'numberOfItemsPerVendorCase'
 			}];
 
+			self.filteredVendorItems = ko.pureComputed(function () {
+				var selectedCategory = self.categoryFilterValue();
+				var items = self.vendorItems();
+				if (!selectedCategory || selectedCategory === 'All') {
+					return items;
+				}
+				var selectedLower = String(selectedCategory).toLowerCase();
+				return (items || []).filter(function (item) {
+					return String(item.category || '').toLowerCase() === selectedLower;
+				});
+			});
+
+			self.categoryFilterDP = ko.pureComputed(function () {
+				return new oj.ArrayDataProvider(self.categoryOptions(), {
+					keyAttributes: 'value'
+				});
+			});
+
 			self.vendorItemsDataProvider = ko.pureComputed(function () {
-				return new oj.ArrayDataProvider(self.vendorItems(), {
+				return new oj.ArrayDataProvider(self.filteredVendorItems(), {
 					keyAttributes: 'id'
 				});
 			});
@@ -86,27 +98,14 @@ define([
 			self.applyVendorItems = function (items) {
 				var normalizedItems = normalizeVendorItems(items || []);
 				self.vendorItems(normalizedItems);
-				self.vendorItemsOriginal(cloneItems(normalizedItems));
+				updateCategoryOptions(normalizedItems);
 				self.vendorItemsLoaded(true);
 				self.vendorItemsLoading(false);
 			};
 
-			self.canResetVendorItems = ko.pureComputed(function () {
-				return self.vendorItemsLoaded() && self.vendorItemsOriginal().length > 0 && !self.isSavingVendorItems();
-			});
-
-			self.canSaveVendorItems = ko.pureComputed(function () {
-				return self.vendorItemsLoaded() && self.vendorItems().length > 0 && !self.isSavingVendorItems();
-			});
-
 			self.isVendorSelected = ko.pureComputed(function () {
 				return !!self.vendorSelectValue();
 			});
-
-			self.resetVendorItems = function () {
-				self.tableMessages([]);
-				self.vendorItems(cloneItems(self.vendorItemsOriginal()));
-			};
 
 			self.resetUploadState = function () {
 				self.uploadMessages([]);
@@ -245,117 +244,12 @@ define([
 				return !!self.selectedFile() && !self.uploadInProgress() && self.isVendorSelected();
 			});
 
-			self.validateVendorItems = function () {
-				self.tableMessages([]);
-
-				var inputs = document.querySelectorAll('#vendor-items-table oj-input-text, #vendor-items-table oj-input-number');
-				var componentsValid = true;
-				Array.prototype.forEach.call(inputs, function (element) {
-					if (typeof element.validate === 'function') {
-						var result = element.validate();
-						if (result === 'invalid') {
-							componentsValid = false;
-						}
-					}
-				});
-
-				var dataValid = true;
-				self.vendorItems().forEach(function (item) {
-					var nameMissing = !item.itemName || !String(item.itemName).trim();
-					var costInvalid = !isNonNegativeNumber(item.costPerItem);
-					var weightInvalid = !isNonNegativeNumber(item.weightCost);
-					var caseInvalid = !isNonNegativeNumber(item.caseCost);
-					var countInvalid = !isPositiveInteger(item.numberOfItemsPerVendorCase);
-
-					if (nameMissing || costInvalid || weightInvalid || caseInvalid || countInvalid) {
-						dataValid = false;
-					}
-				});
-
-				if (!componentsValid || !dataValid) {
-					self.tableMessages([{
-						id: 'vendor-items-validation',
-						severity: 'error',
-						summary: 'Fix validation errors',
-						detail: 'Enter a name and valid numeric values (costs >= 0, items per case >= 1) for all rows.'
-					}]);
-				}
-
-				return componentsValid && dataValid;
-			};
-
-			self.saveVendorItems = function () {
-				self.tableMessages([]);
-
-				if (!self.isVendorSelected()) {
-					self.tableMessages([{
-						id: 'vendor-items-no-vendor',
-						severity: 'error',
-						summary: 'Select a vendor',
-						detail: 'Choose a vendor before saving vendor items.'
-					}]);
-					return;
-				}
-
-				if (!self.vendorItemsLoaded() || self.vendorItems().length === 0) {
-					self.tableMessages([{
-						id: 'vendor-items-empty',
-						severity: 'warning',
-						summary: 'Nothing to save',
-						detail: 'Load vendor items before attempting to save.'
-					}]);
-					return;
-				}
-
-				if (!self.validateVendorItems()) {
-					return;
-				}
-
-				var payload = {
-					vendorItems: self.vendorItems().map(buildVendorItemPayload)
-				};
-
-				var apiURL = appController.serviceURL("vendorItems/updateVendorItems");
-				self.isSavingVendorItems(true);
-
-				$.ajax({
-					url: apiURL,
-					type: "PUT",
-					data: JSON.stringify(payload),
-					contentType: "application/json",
-					beforeSend: function (xhr) {
-						xhr.setRequestHeader('jSessionIDHeader', sessionStorage.getItem('jSessionIDHeader'));
-					},
-					success: function () {
-						self.tableMessages([{
-							id: 'vendor-items-save-success',
-							severity: 'confirmation',
-							summary: 'Saved',
-							detail: 'Vendor items updated successfully.'
-						}]);
-						self.vendorItemsOriginal(cloneItems(self.vendorItems()));
-					},
-					error: function (jqXHR) {
-						self.tableMessages([{
-							id: 'vendor-items-save-failed',
-							severity: 'error',
-							summary: 'Save failed',
-							detail: (jqXHR && jqXHR.responseText) ? jqXHR.responseText : 'Unable to save vendor items. Try again.'
-						}]);
-					},
-					complete: function () {
-						self.isSavingVendorItems(false);
-					}
-				});
-			};
-
 			self.vendorValueActionHandler = function (event) {
 				var vendorNumber = event.detail.value;
 				self.vendorSelectValue(vendorNumber);
 				self.resetUploadState();
-				self.tableMessages([]);
 				self.vendorItems([]);
-				self.vendorItemsOriginal([]);
+				self.categoryFilterValue(null);
 				self.vendorItemsLoaded(false);
 				self.loadVendorItems(vendorNumber);
 			};
@@ -374,7 +268,8 @@ define([
 			self.loadVendorItems = function (vendorNumber) {
 				if (!vendorNumber) {
 					self.vendorItems([]);
-					self.vendorItemsOriginal([]);
+					updateCategoryOptions([]);
+					self.categoryFilterValue(null);
 					self.vendorItemsLoaded(false);
 					self.vendorItemsLoading(false);
 					return;
@@ -409,15 +304,16 @@ define([
 				});
 			}
 
-			function normalizeVendorItems(items) {
-				return (items || []).map(function (item) {
-					var normalized = Object.assign({
-						id: item.vendorNumber + "-" + item.vendorPartNumber + "-" + item.itemNumber
-					}, item);
-					normalized.itemName = normalized.itemName || '';
-					normalized.costPerItem = toOptionalNumber(normalized.costPerItem);
-					normalized.weightCost = toOptionalNumber(normalized.weightCost);
-					normalized.caseCost = toOptionalNumber(normalized.caseCost);
+		function normalizeVendorItems(items) {
+			return (items || []).map(function (item) {
+				var normalized = Object.assign({
+					id: item.vendorNumber + "-" + item.vendorPartNumber + "-" + item.itemNumber
+				}, item);
+				normalized.category = normalized.category || '';
+				normalized.itemName = normalized.itemName || '';
+				normalized.costPerItem = toOptionalNumber(normalized.costPerItem);
+				normalized.weightCost = toOptionalNumber(normalized.weightCost);
+				normalized.caseCost = toOptionalNumber(normalized.caseCost);
 					normalized.numberOfItemsPerVendorCase = toOptionalInteger(normalized.numberOfItemsPerVendorCase);
 					return normalized;
 				});
@@ -442,11 +338,30 @@ define([
 				return merged;
 			}
 
-			function cloneItems(items) {
-				return (items || []).map(function (item) {
-					return Object.assign({}, item);
-				});
+		function updateCategoryOptions(items) {
+			var categories = [{
+				value: 'All',
+				label: 'All'
+			}];
+			var seen = new Set(['all']);
+			(items || []).forEach(function (item) {
+				var category = (item.category || '').trim();
+				if (category && !seen.has(category.toLowerCase())) {
+					seen.add(category.toLowerCase());
+					categories.push({
+						value: category,
+						label: category
+					});
+				}
+			});
+			categories.sort(function (a, b) {
+				return a.label > b.label ? 1 : (b.label > a.label ? -1 : 0);
+			});
+			self.categoryOptions(categories);
+			if (self.categoryFilterValue() && !seen.has(String(self.categoryFilterValue()).toLowerCase())) {
+				self.categoryFilterValue(null);
 			}
+		}
 
 			function toOptionalNumber(value) {
 				if (typeof value === 'string') {
@@ -468,57 +383,6 @@ define([
 				}
 				var intValue = Number(value);
 				return Number.isInteger(intValue) ? intValue : null;
-			}
-
-			function toNumberOrZero(value) {
-				if (typeof value === 'string') {
-					value = value.trim();
-				}
-				var numberValue = Number(value);
-				return Number.isFinite(numberValue) ? numberValue : 0;
-			}
-
-			function toIntegerOrZero(value) {
-				if (typeof value === 'string') {
-					value = value.trim();
-				}
-				var intValue = Number(value);
-				return Number.isInteger(intValue) ? intValue : 0;
-			}
-
-			function isNonNegativeNumber(value) {
-				if (typeof value === 'string') {
-					value = value.trim();
-				}
-				if (value === null || value === undefined || value === '') {
-					return false;
-				}
-				var numberValue = Number(value);
-				return Number.isFinite(numberValue) && numberValue >= 0;
-			}
-
-			function isPositiveInteger(value) {
-				if (typeof value === 'string') {
-					value = value.trim();
-				}
-				if (value === null || value === undefined || value === '') {
-					return false;
-				}
-				var intValue = Number(value);
-				return Number.isInteger(intValue) && intValue >= 1;
-			}
-
-			function buildVendorItemPayload(item) {
-				return {
-					vendorNumber: item.vendorNumber,
-					vendorPartNumber: item.vendorPartNumber,
-					itemNumber: item.itemNumber,
-					itemName: (item.itemName || '').trim(),
-					costPerItem: toNumberOrZero(item.costPerItem),
-					weightCost: toNumberOrZero(item.weightCost),
-					caseCost: toNumberOrZero(item.caseCost),
-					numberOfItemsPerVendorCase: toIntegerOrZero(item.numberOfItemsPerVendorCase)
-				};
 			}
 
 			self.loadVendors();
