@@ -85,8 +85,21 @@
             <div class = "">
                 <oj-bind-if test="[[isProductTableLoad()   ]]">
                     <div class=" oj-flex oj-padding-start">
-                        <div class="oj-flex-item oj-sm-12 oj-md-12 oj-lg-12 oj-sm-padding-2x-start oj-sm-padding-2x-top oj-sm-padding-2x-end">
+                        <div class="oj-flex-item oj-sm-12 oj-md-4 oj-lg-4 oj-sm-padding-2x-start oj-sm-padding-2x-top oj-sm-padding-2x-end">
+                            <div class="oj-sm-padding-1x-bottom  oj-typography-semi-bold">Category</div>
+                            <oj-select-single id="productCategoryFilter"
+                                              class="kn-dropdown-icon-color"
+                                              data="[[productCategoryFilterDP]]"
+                                              placeholder="All categories"
+                                              clear-icon="always"
+                                              value="{{categoryFilterValue}}"
+                                              disabled="[[!isProductTableLoad()]]"
+                                              style="max-width: 26em;">
+                            </oj-select-single>
+                        </div>
+                        <div class="oj-flex-item oj-sm-12 oj-md-8 oj-lg-8 oj-sm-padding-2x-start oj-sm-padding-2x-top oj-sm-padding-2x-end">
                             <div class = "oj-sm-padding-2x-top">
+                                <div class="oj-sm-padding-1x-bottom  oj-typography-semi-bold">Sarch</div>
                                 <oj-input-search id="productsearchid"
                                                  value="{{searchValue}}"
                                                  raw-value="{{searchRawValue}}"
@@ -124,6 +137,9 @@
                                             <td data-bind="click: function (data) { productTableSelectionListener(row.data.itemNumber) } ">
                                                 <oj-bind-text value="[[row.data.vendorItemName]]"></oj-bind-text>
 
+                                            </td>
+                                            <td data-bind="click: function (data) { productTableSelectionListener(row.data.itemNumber) }">
+                                                <oj-bind-text value="[[row.data.category]]"></oj-bind-text>
                                             </td>
                                             <td style="text-align: center;"  data-bind="click: function (data) { productTableSelectionListener(row.data.itemNumber) }">
                                                 <oj-bind-text value="[[row.data.unitMeasure]]"></oj-bind-text>

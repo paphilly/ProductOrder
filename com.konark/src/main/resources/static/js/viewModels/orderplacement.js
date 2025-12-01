@@ -20,6 +20,8 @@ define(['require', 'ojs/ojcore', 'knockout', 'knockout', 'ojs/ojrouter', 'appCon
             self.orderTotalValue = ko.observable(0);
             self.vendorSelectValue = ko.observable();
             self.deptSelectValue = ko.observable(['All']);
+            self.categoryFilterValue = ko.observable('All');
+            self.categoryOptions = ko.observableArray([]);
             self.searchValue = ko.observable();
             self.searchRawValue = ko.observable('searchrawvalue');
             self.searchTerm = ko.observable('searchterm');
@@ -44,6 +46,12 @@ define(['require', 'ojs/ojcore', 'knockout', 'knockout', 'ojs/ojrouter', 'appCon
             self.salesHistoryTable = ko.observable(false);
             self.salesHistoryTableLoading = ko.observable(false);
             self.storeSelectValue = ko.observable();
+
+            self.productCategoryFilterDP = ko.pureComputed(function() {
+                return new oj.ArrayDataProvider(self.categoryOptions(), {
+                    keyAttributes: "value"
+                });
+            });
 
             AnimationFunction = oj.AnimationUtils['fadeIn'];
 
@@ -138,25 +146,14 @@ define(['require', 'ojs/ojcore', 'knockout', 'knockout', 'ojs/ojrouter', 'appCon
                 self.showMessage(false);
                 self.isProductTableLoad(false);
                 self.isProductTableLoadisBusy(true);
+                var baseData = getFilteredProducts();
                 var detail = event.detail;
                 if (detail.itemContext === null) {
-                    self.productTableDataproviderToSort = new oj.ArrayDataProvider(self.vendorItemsDataBackup());
-                    self.productTableDataprovider = new oj.ListDataProviderView(self.productTableDataproviderToSort, {
-                        sortCriteria: [{
-                            attribute: "vendorItemName",
-                            direction: "ascending"
-                        }],
-                    });
+                    setProductTableData(baseData);
 
                 } else {
-                    var filteredData = self.vendorItemsDataBackup().filter(item => item.vendorItemName === detail.value);
-                    self.productTableDataproviderToSort = new oj.ArrayDataProvider(filteredData);
-                    self.productTableDataprovider = new oj.ListDataProviderView(self.productTableDataproviderToSort, {
-                        sortCriteria: [{
-                            attribute: "vendorItemName",
-                            direction: "ascending"
-                        }],
-                    });
+                    var filteredData = baseData.filter(item => item.vendorItemName === detail.value);
+                    setProductTableData(filteredData);
 
                 }
 
@@ -257,17 +254,10 @@ define(['require', 'ojs/ojcore', 'knockout', 'knockout', 'ojs/ojrouter', 'appCon
                 var apiURL = appControls.serviceURL("vendorItems/productorder", urlParms);
                 app.ajax("GET", apiURL, function(responseModel) {
                     self.vendorItemsDataBackup(responseModel.data.ProductOrderModel.productItems);
-                  //  var filteredData = self.vendorItemsDataBackup().filter(item => item.inventoryFlag === true);
-                  var filteredData = self.vendorItemsDataBackup();
-                    self.productTableDataproviderToSort = new oj.ArrayDataProvider(filteredData);
-                    self.productTableDataprovider = new oj.ListDataProviderView(self.productTableDataproviderToSort, {
-                        sortCriteria: [{
-                            attribute: "vendorItemName",
-                            direction: "ascending"
-                        }],
-                    });
-
-
+                    updateCategoryOptions(self.vendorItemsDataBackup());
+                    self.categoryFilterValue('All');
+                    var filteredData = getFilteredProducts();
+                    setProductTableData(filteredData);
                     self.productTableColumns(buildProductTableColumns());
                     buildSearchDataProvider(filteredData);
                     self.deptSelectManyDP = new oj.ArrayDataProvider(buildDepts(responseModel.data.ProductOrderModel.productItems), {
@@ -314,6 +304,13 @@ define(['require', 'ojs/ojcore', 'knockout', 'knockout', 'ojs/ojrouter', 'appCon
                         "resizable": "enabled",
                         'headerStyle': "color : black;font-size: 1em;font-weight: 600; width: 10em;",
                     }, {
+                        "headerText": 'Category',
+                        "sortProperty": 'category',
+                        "headerClassName": 'kn-table-header-class',
+                        "field": 'category',
+                        "resizable": "enabled",
+                        'headerStyle': "color : black;font-size: 1em;font-weight: 600; width: 8em;",
+                    }, {
                         "headerText": 'Units',
                         "sortProperty": 'unitMeasure',
                         "headerClassName": 'kn-table-header-class',
@@ -355,6 +352,54 @@ define(['require', 'ojs/ojcore', 'knockout', 'knockout', 'ojs/ojrouter', 'appCon
             }
 
 
+            function setProductTableData(data) {
+                self.productTableDataproviderToSort = new oj.ArrayDataProvider(data || []);
+                self.productTableDataprovider = new oj.ListDataProviderView(self.productTableDataproviderToSort, {
+                    sortCriteria: [{
+                        attribute: "vendorItemName",
+                        direction: "ascending"
+                    }],
+                });
+            }
+
+            function applyCategoryFilter(data) {
+                var category = self.categoryFilterValue();
+                if (!category || category === 'All') {
+                    return data || [];
+                }
+                var match = String(category).toLowerCase();
+                return (data || []).filter(function(item) {
+                    return String(item.category || '').toLowerCase() === match;
+                });
+            }
+
+            function applyDeptFilter(data) {
+                var depts = self.deptSelectValue ? self.deptSelectValue() : [];
+                if (!depts || depts.length === 0 || depts[0] === 'All') {
+                    return data || [];
+                }
+                return (data || []).filter(function(item) {
+                    return depts.indexOf(item.department) > -1;
+                });
+            }
+
+            function applyInventoryFilter(data) {
+                if (self.showAllProductsSwitchValue()) {
+                    return data || [];
+                }
+                return (data || []).filter(function(item) {
+                    return item.inventoryFlag === true;
+                });
+            }
+
+            function getFilteredProducts() {
+                var base = self.vendorItemsDataBackup() || [];
+                var afterCategory = applyCategoryFilter(base);
+                var afterDept = applyDeptFilter(afterCategory);
+                return applyInventoryFilter(afterDept);
+            }
+
+
             function buildDepts(input) {
                 var dataArray = [];
                 dataArray.push({
@@ -370,6 +415,32 @@ define(['require', 'ojs/ojcore', 'knockout', 'knockout', 'ojs/ojrouter', 'appCon
                 // filter duplicates and sort.
                 return dataArray.filter((v, i, a) => a.findIndex(t => (t.label === v.label && t.value === v.value)) === i).sort((a, b) => (a.label > b.label) ? 1 : ((b.label > a.label) ? -1 : 0));
 
+            }
+
+            function updateCategoryOptions(items) {
+                var categories = [{
+                    value: 'All',
+                    label: 'All'
+                }];
+                var seen = new Set(['all']);
+                (items || []).forEach(function(item) {
+                    var category = (item.category || '').trim();
+                    var lower = category.toLowerCase();
+                    if (category && !seen.has(lower)) {
+                        seen.add(lower);
+                        categories.push({
+                            value: category,
+                            label: category
+                        });
+                    }
+                });
+                categories.sort(function(a, b) {
+                    return a.label > b.label ? 1 : (b.label > a.label ? -1 : 0);
+                });
+                self.categoryOptions(categories);
+                if (!seen.has(String(self.categoryFilterValue()).toLowerCase())) {
+                    self.categoryFilterValue('All');
+                }
             }
 
 
@@ -401,32 +472,11 @@ define(['require', 'ojs/ojcore', 'knockout', 'knockout', 'ojs/ojrouter', 'appCon
 
 
 
-                if (self.deptSelectValue()[0] === 'All') {
-                    self.productTableDataproviderToSort = new oj.ArrayDataProvider(self.vendorItemsDataBackup());
-                    self.productTableDataprovider = new oj.ListDataProviderView(self.productTableDataproviderToSort, {
-                        sortCriteria: [{
-                            attribute: "vendorItemName",
-                            direction: "ascending"
-                        }],
-                    });
+                var filteredData = getFilteredProducts();
+                setProductTableData(filteredData);
 
-                    // load search suggestions again
-                    buildSearchDataProvider(self.vendorItemsDataBackup());
-                } else {
-                    var filteredData = self.vendorItemsDataBackup().filter(item => deptArray.includes(item.department));
-                    self.productTableDataproviderToSort = new oj.ArrayDataProvider(filteredData);
-                    self.productTableDataprovider = new oj.ListDataProviderView(self.productTableDataproviderToSort, {
-                        sortCriteria: [{
-                            attribute: "vendorItemName",
-                            direction: "ascending"
-                        }],
-                    });
-
-
-                    // load search suggestions again
-                    buildSearchDataProvider(filteredData);
-
-                }
+                // load search suggestions again
+                buildSearchDataProvider(filteredData);
 
 
 
@@ -437,6 +487,7 @@ define(['require', 'ojs/ojcore', 'knockout', 'knockout', 'ojs/ojrouter', 'appCon
 
             // buildSearchDataProvider -- input from load products
             function buildSearchDataProvider(input) {
+                input = input || [];
                 var dataArray = [];
                 for (var i = 0; i < input.length; i++) {
                     dataArray.push({
@@ -467,33 +518,23 @@ define(['require', 'ojs/ojcore', 'knockout', 'knockout', 'ojs/ojrouter', 'appCon
                 self.isProductTableLoad(false);
                 self.isProductTableLoadisBusy(true);
 
-                if (newValue === false) {
-                    var filteredData = self.vendorItemsDataBackup().filter(item => item.inventoryFlag === true);
-                    self.productTableDataproviderToSort = new oj.ArrayDataProvider(filteredData);
-                    self.productTableDataprovider = new oj.ListDataProviderView(self.productTableDataproviderToSort, {
-                        sortCriteria: [{
-                            attribute: "vendorItemName",
-                            direction: "ascending"
-                        }],
-                    });
-                    buildSearchDataProvider(filteredData);
-
-
-                } else {
-                    self.productTableDataproviderToSort = new oj.ArrayDataProvider(self.vendorItemsDataBackup());
-                    self.productTableDataprovider = new oj.ListDataProviderView(self.productTableDataproviderToSort, {
-                        sortCriteria: [{
-                            attribute: "vendorItemName",
-                            direction: "ascending"
-                        }],
-                    });
-                    buildSearchDataProvider(self.vendorItemsDataBackup());
-
-                }
+                var filteredData = getFilteredProducts();
+                setProductTableData(filteredData);
+                buildSearchDataProvider(filteredData);
 
                 self.isProductTableLoad(true);
                 self.isProductTableLoadisBusy(false);
 
+            });
+
+            self.categoryFilterValue.subscribe(function() {
+                self.isProductTableLoad(false);
+                self.isProductTableLoadisBusy(true);
+                var filteredData = getFilteredProducts();
+                setProductTableData(filteredData);
+                buildSearchDataProvider(filteredData);
+                self.isProductTableLoad(true);
+                self.isProductTableLoadisBusy(false);
             });
 
 
@@ -580,13 +621,7 @@ define(['require', 'ojs/ojcore', 'knockout', 'knockout', 'ojs/ojrouter', 'appCon
                 self.isReviewOrder(false);
                 self.isProductTableLoad(false);
                 self.isProductTableLoadisBusy(true);
-                self.productTableDataproviderToSort = new oj.ArrayDataProvider(self.vendorItemsDataBackup());
-                self.productTableDataprovider = new oj.ListDataProviderView(self.productTableDataproviderToSort, {
-                    sortCriteria: [{
-                        attribute: "vendorItemName",
-                        direction: "ascending"
-                    }],
-                });
+                setProductTableData(getFilteredProducts());
 
                 self.isProductTableLoad(true);
                 self.isProductTableLoadisBusy(false);
@@ -617,13 +652,7 @@ define(['require', 'ojs/ojcore', 'knockout', 'knockout', 'ojs/ojrouter', 'appCon
                 self.orderTotalValue(0);
                 self.isProductTableLoad(false);
                 self.isProductTableLoadisBusy(true);
-                self.productTableDataproviderToSort = new oj.ArrayDataProvider(self.vendorItemsDataBackup());
-                self.productTableDataprovider = new oj.ListDataProviderView(self.productTableDataproviderToSort, {
-                    sortCriteria: [{
-                        attribute: "vendorItemName",
-                        direction: "ascending"
-                    }],
-                });
+                setProductTableData(getFilteredProducts());
 
                 self.isProductTableLoad(true);
                 self.isProductTableLoadisBusy(false);
