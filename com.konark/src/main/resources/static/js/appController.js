@@ -9,7 +9,8 @@ define(['knockout', 'ojs/ojmodule-element-utils', 'ojs/ojknockouttemplateutils',
 			var self = this;
 
 			// Optional override for the API base URL. Set window.APIBaseUrl to use a custom base; fallback to browser-derived URL otherwise.
-			const APIBaseUrl = "http://localhost:8080/";
+			//const APIBaseUrl = "http://localhost:8080/";
+			const APIBaseUrl = null;
 			var configuredApiBaseUrl = normalizeBaseUrl(APIBaseUrl ?? window.APIBaseUrl);
 
 
