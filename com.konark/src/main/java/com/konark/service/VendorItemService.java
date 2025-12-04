@@ -7,6 +7,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
@@ -159,7 +161,7 @@ public class VendorItemService {
 //		 
 //		 List<VendorInventoryProjection> results = vendorItemRepository.findByStoreIdAndVendorNumber(storeID, vendorNumber);
 
-		 List<VendorInventoryProjection> vendorItemResults = vendorItemRepository.findItemsByVendorNumber( vendorNumber);
+		 List<VendorInventoryProjection> vendorItemResults = vendorItemRepository.findConsolidatedItemsByVendorNumber( vendorNumber);
 
 
 			vendorItemResults.forEach(vendorItem -> {
@@ -386,10 +388,9 @@ vendorItems.add( vendorItem );
 
 		VendorItemModel vendorItemModel = new VendorItemModel();
 
-		List<VendorItemEntity> vendorItems = vendorItemRepository.findByVendorNumber( vendorNumber ); // get existing items so it can be updated
-
-		//List<VendorItemEntity> vendorItems = new ArrayList<VendorItemEntity>();
-		vendorItemModel.setvendorItems( vendorItems );
+		List<VendorItemEntity> allVendorItems = new ArrayList<VendorItemEntity>();
+		List<VendorItemEntity> incomingVendorItems = new ArrayList<VendorItemEntity>();
+		vendorItemModel.setvendorItems( incomingVendorItems );
 
 		DataFormatter formatter = new DataFormatter();
 		for (int i = 1; i <= sheet.getLastRowNum(); i++) { // skip header
@@ -411,10 +412,31 @@ vendorItems.add( vendorItem );
 
 			vendorItem.setVendorNumber( vendorNumber );
 
-			vendorItems.add( vendorItem );
+			incomingVendorItems.add( vendorItem );
 			// vendorItemRepository.save(vendorItem);
 		}
-		vendorItemRepository.saveAll( vendorItems );
+		// vendorItemRepository.saveAll( incomingVendorItems );
+		allVendorItems.addAll( incomingVendorItems );
+
+		List<VendorItemEntity> 	existingVendorItems = vendorItemRepository.findByVendorNumber( vendorNumber ); // get existing items so it can be updated
+
+		Set<String> incomingPartNums = incomingVendorItems.stream()
+			.map(item -> item.getVendorPartNumber())
+			.collect( Collectors.toSet());
+
+		List<VendorItemEntity> onlyInExisting = existingVendorItems.stream()
+			.filter(item -> !incomingPartNums.contains(item.getVendorPartNumber()))
+			.collect(Collectors.toList());
+
+		onlyInExisting.forEach( onlyInexistingItem -> onlyInexistingItem.setStatus( "Inactive" ) );
+
+		allVendorItems.addAll( onlyInExisting );
+
+		vendorItemRepository.saveAll( allVendorItems );
+
+		allVendorItems = vendorItemRepository.findByVendorNumber( vendorNumber ); // get existing items so it can be updated
+
+		vendorItemModel.setvendorItems( allVendorItems );
 
 		workbook.close();
 		return vendorItemModel;

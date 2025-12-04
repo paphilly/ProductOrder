@@ -49,8 +49,8 @@ define([
 				headerText: 'Vendor Part #',
 				field: 'vendorPartNumber'
 			}, {
-				headerText: 'Item #',
-				field: 'itemNumber'
+				headerText: 'Status',
+				field: 'status'
 			}, {
 				headerText: 'Item Name',
 				field: 'itemName'

@@ -138,4 +138,36 @@ nativeQuery = true)
 List<VendorInventoryProjection> findItemsByVendorNumber( @Param("vendorNumber") String vendorNumber
 );
 
+	@Query(
+		value = """
+            SELECT
+                vendor.Company AS vendorName,
+                invVend.ItemNum AS itemNum,
+                invVend.Store_ID AS storeId,
+                COALESCE(invVend.Vendor_Number, newInvVend.Vendor_Number) AS vendorNumber,
+                COALESCE(invVend.costPer, newInvVend.costPer) AS costPer,
+                COALESCE(invVend.Case_Cost, newInvVend.Case_Cost) AS caseCost,
+                COALESCE(invVend.NumPerVenCase, newInvVend.NumPerVenCase) AS numPerVenCase,
+                COALESCE(invVend.Vendor_Part_Num, newInvVend.Vendor_Part_Num) AS vendorPartNum,
+                COALESCE(inventory.ItemName, newInvVend.ItemName) AS itemName,
+                inventory.In_Stock AS inStock,
+                inventory.Dept_ID AS deptId,
+                department.Description AS description
+            FROM Inventory_Vendors invVend
+            FULL OUTER JOIN Inventory_Vendors_v1 newInvVend
+                ON invVend.Vendor_Part_Num = newInvVend.Vendor_Part_Num
+               AND invVend.Vendor_Number    = newInvVend.Vendor_Number
+            LEFT JOIN Vendors vendor
+                ON vendor.Vendor_Number = COALESCE(invVend.Vendor_Number, newInvVend.Vendor_Number)
+            LEFT JOIN Inventory inventory
+                ON inventory.ItemNum = invVend.ItemNum
+            LEFT JOIN Departments department
+                ON department.Dept_ID = inventory.Dept_ID
+            WHERE COALESCE(invVend.Vendor_Number, newInvVend.Vendor_Number) = :vendorNumber
+            """,
+		nativeQuery = true
+	)
+	List<VendorInventoryProjection> findConsolidatedItemsByVendorNumber( @Param("vendorNumber") String vendorNumber
+	);
+
 }
