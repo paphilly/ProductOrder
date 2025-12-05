@@ -150,6 +150,7 @@ List<VendorInventoryProjection> findItemsByVendorNumber( @Param("vendorNumber") 
                 COALESCE(invVend.NumPerVenCase, newInvVend.NumPerVenCase) AS numPerVenCase,
                 COALESCE(invVend.Vendor_Part_Num, newInvVend.Vendor_Part_Num) AS vendorPartNum,
                 COALESCE(inventory.ItemName, newInvVend.ItemName) AS itemName,
+                COALESCE(NULL, newInvVend.category) AS category,
                 inventory.In_Stock AS inStock,
                 inventory.Dept_ID AS deptId,
                 department.Description AS description

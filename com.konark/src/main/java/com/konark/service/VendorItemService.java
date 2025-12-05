@@ -409,7 +409,7 @@ vendorItems.add( vendorItem );
 			vendorItem.setNumberOfItemsPerVendorCase(formatter.formatCellValue(row.getCell(7)));
 			vendorItem.setDateCreated(new Date() );
 			vendorItem.setDateModified( new Date() );
-
+            vendorItem.setStatus( "Active" );
 			vendorItem.setVendorNumber( vendorNumber );
 
 			incomingVendorItems.add( vendorItem );
