@@ -47,28 +47,60 @@ define([
 
 			self.vendorItemsColumns = [{
 				headerText: 'Vendor Part #',
-				field: 'vendorPartNumber'
+				sortProperty: 'vendorPartNumber',
+				field: 'vendorPartNumber',
+				headerClassName: 'kn-table-header-class',
+				resizable: 'enabled',
+				headerStyle: 'color : black;font-size: 1em;font-weight: 600;'
 			}, {
 				headerText: 'Status',
-				field: 'status'
+				sortProperty: 'status',
+				field: 'status',
+				headerClassName: 'kn-table-header-class',
+				resizable: 'enabled',
+				headerStyle: 'color : black;font-size: 1em;font-weight: 600;'
 			}, {
 				headerText: 'Item Name',
-				field: 'itemName'
+				sortProperty: 'itemName',
+				field: 'itemName',
+				headerClassName: 'kn-table-header-class',
+				resizable: 'enabled',
+				headerStyle: 'color : black;font-size: 1em;font-weight: 600;'
 			}, {
 				headerText: 'Category',
-				field: 'category'
+				sortProperty: 'category',
+				field: 'category',
+				headerClassName: 'kn-table-header-class',
+				resizable: 'enabled',
+				headerStyle: 'color : black;font-size: 1em;font-weight: 600;'
 			}, {
 				headerText: 'Cost / Item',
-				field: 'costPerItem'
+				sortProperty: 'costPerItem',
+				field: 'costPerItem',
+				headerClassName: 'kn-table-header-class',
+				resizable: 'enabled',
+				headerStyle: 'color : black;font-size: 1em;font-weight: 600;'
 			}, {
 				headerText: 'Weight Cost',
-				field: 'weightCost'
+				sortProperty: 'weightCost',
+				field: 'weightCost',
+				headerClassName: 'kn-table-header-class',
+				resizable: 'enabled',
+				headerStyle: 'color : black;font-size: 1em;font-weight: 600;'
 			}, {
 				headerText: 'Case Cost',
-				field: 'caseCost'
+				sortProperty: 'caseCost',
+				field: 'caseCost',
+				headerClassName: 'kn-table-header-class',
+				resizable: 'enabled',
+				headerStyle: 'color : black;font-size: 1em;font-weight: 600;'
 			}, {
 				headerText: '# Items / Case',
-				field: 'numberOfItemsPerVendorCase'
+				sortProperty: 'numberOfItemsPerVendorCase',
+				field: 'numberOfItemsPerVendorCase',
+				headerClassName: 'kn-table-header-class',
+				resizable: 'enabled',
+				headerStyle: 'color : black;font-size: 1em;font-weight: 600;'
 			}];
 
 			self.filteredVendorItems = ko.pureComputed(function () {

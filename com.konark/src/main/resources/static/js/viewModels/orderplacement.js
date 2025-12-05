@@ -46,6 +46,7 @@ define(['require', 'ojs/ojcore', 'knockout', 'knockout', 'ojs/ojrouter', 'appCon
             self.salesHistoryTable = ko.observable(false);
             self.salesHistoryTableLoading = ko.observable(false);
             self.storeSelectValue = ko.observable();
+            self.productTableRefreshTimer = null;
 
             self.productCategoryFilterDP = ko.pureComputed(function() {
                 return new oj.ArrayDataProvider(self.categoryOptions(), {
@@ -605,7 +606,19 @@ define(['require', 'ojs/ojcore', 'knockout', 'knockout', 'ojs/ojrouter', 'appCon
                     showMessages("confirmation", "Order '" + responseModel.data.productOrderID + "' is placed" );
                     self.productOrderLoading(false);
                     self.showMessage(true);
-                    resetProductTableToVendorItems();
+                    window.setTimeout(function() {
+                        self.showMessage(false);
+                    }, 5000);
+                    if (self.productTableRefreshTimer) {
+                        clearTimeout(self.productTableRefreshTimer);
+                    }
+                     resetProductTableToVendorItems();
+                      var productTable = document.getElementById('producttableid');
+                        if (productTable && typeof productTable.refresh === 'function') {
+                            productTable.refresh();
+                        }
+                    // Allow the confirmation message to stay visible before refreshing the table.
+                    
                 }, knockoutMap.toJSON(postModel), 'JSON', 'application/json');
             };
 
@@ -650,6 +663,12 @@ define(['require', 'ojs/ojcore', 'knockout', 'knockout', 'ojs/ojrouter', 'appCon
                 self.isReviewOrder(false);
                 self.productDetailsToPost([]);
                 self.orderTotalValue(0);
+                // Reset all order quantities back to null so the table inputs clear.
+                var items = self.vendorItemsDataBackup() || [];
+                items.forEach(function(item) {
+                    item.quantityOrdered = null;
+                });
+                self.vendorItemsDataBackup(items);
                 self.isProductTableLoad(false);
                 self.isProductTableLoadisBusy(true);
                 setProductTableData(getFilteredProducts());
