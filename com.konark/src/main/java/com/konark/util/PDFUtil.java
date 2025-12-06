@@ -5,8 +5,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.util.Base64;
 import java.util.Date;
 
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.util.StreamUtils;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.templatemode.TemplateMode;
@@ -66,7 +69,17 @@ public class PDFUtil {
 		TemplateEngine templateEngine = new TemplateEngine();
 		templateEngine.setTemplateResolver(templateResolver);
 
+		ClassPathResource imgFile = new ClassPathResource( "static/css/images/konark_logo.png");
+		byte[] bytes = null;
+		try {
+			bytes = StreamUtils.copyToByteArray( imgFile.getInputStream());
+		} catch( IOException e ) {
+			throw new RuntimeException( e );
+		}
+		String base64 = Base64.getEncoder().encodeToString( bytes);
+
 		Context context = new Context();
+		context.setVariable("logoBase64", base64);
 		context.setVariable("vendorRefName", vendorRefName);
 		context.setVariable("billNumber", billNumber);
 		context.setVariable("location",location);

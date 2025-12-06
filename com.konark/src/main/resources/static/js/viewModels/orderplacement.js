@@ -304,7 +304,16 @@ define(['require', 'ojs/ojcore', 'knockout', 'knockout', 'ojs/ojrouter', 'appCon
                         "field": 'productName',
                         "resizable": "enabled",
                         'headerStyle': "color : black;font-size: 1em;font-weight: 600; width: 10em;",
-                    }, {
+                    },
+                    {
+                        "headerText": 'Part Number',
+                        "headerClassName": 'kn-table-header-class',
+                        "sortProperty": 'vendorPartNumber',
+                        "field": 'vendorPartNumber',
+                        "resizable": "enabled",
+                        'headerStyle': "color : black;font-size: 1em;font-weight: 600; width: 10em;",
+                    },
+                    {
                         "headerText": 'Category',
                         "sortProperty": 'category',
                         "headerClassName": 'kn-table-header-class',

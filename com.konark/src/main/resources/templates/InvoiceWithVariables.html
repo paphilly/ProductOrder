@@ -126,7 +126,7 @@
                                <div style=" color: #a0be01; font-weight : 300;" class="header-right-div" >
 
 								<div> <b> Ship To : </b></div>
-                                <img th:src="@{src/main/resources/static/css/images/konark_logo.png}" style=" height: 3em; width: 13em;"/>
+                                   <img th:src="@{classpath:/static/css/images/konark_logo.png}" style=" height: 3em; width: 13em;"/>
                                   <div  th:if="${store.storeName neq null}" style="padding-top: 2px;  padding-bottom: 1em;">
                                     <th:block th:with="addr = ${store}">
                                         <th:block th:text="${#strings.arrayJoin({addr.addressInfo, addr.addressInfo1, addr.addressInfo2}.{? #this neq null}, ', ')}"></th:block>
