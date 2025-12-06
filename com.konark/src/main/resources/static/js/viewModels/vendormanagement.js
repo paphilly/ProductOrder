@@ -53,13 +53,6 @@ define([
 				resizable: 'enabled',
 				headerStyle: 'color : black;font-size: 1em;font-weight: 600;'
 			}, {
-				headerText: 'Status',
-				sortProperty: 'status',
-				field: 'status',
-				headerClassName: 'kn-table-header-class',
-				resizable: 'enabled',
-				headerStyle: 'color : black;font-size: 1em;font-weight: 600;'
-			}, {
 				headerText: 'Item Name',
 				sortProperty: 'itemName',
 				field: 'itemName',
@@ -101,7 +94,36 @@ define([
 				headerClassName: 'kn-table-header-class',
 				resizable: 'enabled',
 				headerStyle: 'color : black;font-size: 1em;font-weight: 600;'
+			}, {
+				headerText: 'Status',
+				sortProperty: 'status',
+				field: 'status',
+				headerClassName: 'kn-table-header-class',
+				resizable: 'enabled',
+				headerStyle: 'color : black;font-size: 1em;font-weight: 600;'
 			}];
+
+			// Map status text to a badge color for the table flag.
+			self.statusBadgeClass = function (status) {
+				var normalized = (status || '').toString().trim().toLowerCase();
+				if (!normalized) {
+					return 'oj-badge-subtle';
+				}
+				// Check negative states first to avoid 'inactive' matching the 'active' branch.
+				if (normalized.indexOf('inactive') !== -1 || normalized.indexOf('blocked') !== -1 || normalized.indexOf('discontinued') !== -1) {
+					return 'oj-badge-danger';
+				}
+				if (normalized.indexOf('active') !== -1 || normalized.indexOf('available') !== -1) {
+					return 'oj-badge-success';
+				}
+				if (normalized.indexOf('pending') !== -1 || normalized.indexOf('review') !== -1 || normalized.indexOf('hold') !== -1) {
+					return 'oj-badge-warning';
+				}
+				if (normalized.indexOf('new') !== -1 || normalized.indexOf('upload') !== -1) {
+					return 'oj-badge-info';
+				}
+				return 'oj-badge-subtle';
+			};
 
 			self.filteredVendorItems = ko.pureComputed(function () {
 				var selectedCategory = self.categoryFilterValue();
@@ -244,7 +266,7 @@ define([
 							uploadedItems = normalizeVendorItems(response.data.VendorItemModel.vendorItems);
 						}
 
-						var merged = mergeUniqueVendorPartNumbers(self.vendorItems(), uploadedItems, self.vendorSelectValue());
+						var merged = mergeVendorItems(self.vendorItems(), uploadedItems, self.vendorSelectValue());
 						self.applyVendorItems(merged);
 
 						self.uploadInProgress(false);
@@ -313,11 +335,7 @@ define([
 				app.ajax("GET", apiURL, function (responseModel) {
 					var items = [];
 					if (responseModel && responseModel.data && responseModel.data.VendorItemModel && responseModel.data.VendorItemModel.vendorItems) {
-						items = responseModel.data.VendorItemModel.vendorItems.map(function (item) {
-							return Object.assign({
-								id: item.vendorNumber + "-" + item.vendorPartNumber + "-" + item.itemNumber
-							}, item);
-						});
+						items = normalizeVendorItems(responseModel.data.VendorItemModel.vendorItems);
 					}
 					self.applyVendorItems(items);
 				}, "", "", "application/json");
@@ -338,37 +356,52 @@ define([
 
 		function normalizeVendorItems(items) {
 			return (items || []).map(function (item) {
-				var normalized = Object.assign({
-					id: item.vendorNumber + "-" + item.vendorPartNumber + "-" + item.itemNumber
-				}, item);
+				var normalized = Object.assign({}, item);
+				normalized.vendorNumber = normalized.vendorNumber ? String(normalized.vendorNumber) : '';
+				normalized.vendorPartNumber = normalized.vendorPartNumber ? String(normalized.vendorPartNumber) : '';
+				normalized.itemNumber = normalized.itemNumber ? String(normalized.itemNumber) : '';
+				normalized.id = normalized.vendorNumber + "-" + normalized.vendorPartNumber + "-" + normalized.itemNumber;
 				normalized.category = normalized.category || '';
 				normalized.itemName = normalized.itemName || '';
 				normalized.costPerItem = toOptionalNumber(normalized.costPerItem);
 				normalized.weightCost = toOptionalNumber(normalized.weightCost);
 				normalized.caseCost = toOptionalNumber(normalized.caseCost);
-					normalized.numberOfItemsPerVendorCase = toOptionalInteger(normalized.numberOfItemsPerVendorCase);
-					return normalized;
-				});
-			}
-
-			function mergeUniqueVendorPartNumbers(existingItems, newItems, vendorNumber) {
-				var merged = existingItems ? existingItems.slice() : [];
-				var existingPartNumbers = new Set(merged.filter(function (it) {
-					return it.vendorNumber === vendorNumber;
-				}).map(function (it) {
-					return it.vendorPartNumber;
-				}));
-
-				for (var i = 0; i < newItems.length; i++) {
-					var item = newItems[i];
-					if (item.vendorNumber === vendorNumber && !existingPartNumbers.has(item.vendorPartNumber)) {
-						merged.push(item);
-						existingPartNumbers.add(item.vendorPartNumber);
-					}
+				normalized.numberOfItemsPerVendorCase = toOptionalInteger(normalized.numberOfItemsPerVendorCase);
+				normalized.status = (normalized.status || '').toString().trim();
+				if (!normalized.status) {
+					normalized.status = 'Unknown';
 				}
+				return normalized;
+			});
+		}
 
-				return merged;
+		function mergeVendorItems(existingItems, newItems, vendorNumber) {
+			var vendorKey = (vendorNumber === null || vendorNumber === undefined) ? '' : String(vendorNumber);
+			var merged = existingItems ? existingItems.slice() : [];
+			var indexById = new Map();
+
+			for (var i = 0; i < merged.length; i++) {
+				var current = merged[i];
+				if (current && current.id) {
+					indexById.set(current.id, i);
+				}
 			}
+
+			for (var j = 0; j < newItems.length; j++) {
+				var item = newItems[j];
+				var itemVendorMatches = !vendorKey || !item.vendorNumber || item.vendorNumber === vendorKey;
+				var existingIndex = item.id ? indexById.get(item.id) : undefined;
+
+				if (existingIndex !== undefined) {
+					merged[existingIndex] = Object.assign({}, merged[existingIndex], item);
+				} else if (itemVendorMatches) {
+					indexById.set(item.id, merged.length);
+					merged.push(item);
+				}
+			}
+
+			return merged;
+		}
 
 		function updateCategoryOptions(items) {
 			var categories = [{

@@ -75,9 +75,6 @@
                                 <oj-bind-text value="[[row.data.vendorPartNumber]]"></oj-bind-text>
                             </td>
                             <td>
-                                <oj-bind-text value="[[row.data.status]]"></oj-bind-text>
-                            </td>
-                            <td>
                                 <oj-bind-text value="[[row.data.itemName]]"></oj-bind-text>
                             </td>
                             <td>
@@ -94,6 +91,11 @@
                             </td>
                             <td>
                                 <oj-bind-text value="[[row.data.numberOfItemsPerVendorCase]]"></oj-bind-text>
+                            </td>
+                            <td>
+                                <span class="oj-badge oj-badge-large oj-badge-subtle" :class="[[statusBadgeClass(row.data.status)]]">
+                                    <oj-bind-text value="[[row.data.status || 'Unknown']]"></oj-bind-text>
+                                </span>
                             </td>
                         </tr>
                     </template>
