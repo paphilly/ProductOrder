@@ -303,7 +303,7 @@ define(['require', 'ojs/ojcore', 'knockout', 'knockout', 'ojs/ojrouter', 'appCon
                         "sortProperty": 'vendorItemName',
                         "field": 'productName',
                         "resizable": "enabled",
-                        'headerStyle': "color : black;font-size: 1em;font-weight: 600; width: 10em;",
+                        'headerStyle': "color : black;font-size: 1em;font-weight: 600; width: 8em;",
                     },
                     {
                         "headerText": 'PartNumber',
@@ -311,7 +311,7 @@ define(['require', 'ojs/ojcore', 'knockout', 'knockout', 'ojs/ojrouter', 'appCon
                         "sortProperty": 'vendorPartNumber',
                         "field": 'vendorPartNumber',
                         "resizable": "enabled",
-                        'headerStyle': "color : black;font-size: 1em;font-weight: 600; width: 9em;",
+                        'headerStyle': "color : black;font-size: 1em;font-weight: 600; width: 7em;",
                     },
                     {
                         "headerText": 'ItemNumber',
@@ -319,7 +319,7 @@ define(['require', 'ojs/ojcore', 'knockout', 'knockout', 'ojs/ojrouter', 'appCon
                         "sortProperty": 'itemNumber',
                         "field": 'itemNumber',
                         "resizable": "enabled",
-                        'headerStyle': "color : black;font-size: 1em;font-weight: 600; width: 9em;",
+                        'headerStyle': "color : black;font-size: 1em;font-weight: 600; width: 7em;",
                     },
                     {
                         "headerText": 'Category',
@@ -327,21 +327,21 @@ define(['require', 'ojs/ojcore', 'knockout', 'knockout', 'ojs/ojrouter', 'appCon
                         "headerClassName": 'kn-table-header-class',
                         "field": 'category',
                         "resizable": "enabled",
-                        'headerStyle': "color : black;font-size: 1em;font-weight: 600; width: 8em;",
+                        'headerStyle': "color : black;font-size: 1em;font-weight: 600; width: 7em;",
                     }, {
                         "headerText": 'Units',
                         "sortProperty": 'unitMeasure',
                         "headerClassName": 'kn-table-header-class',
                         "field": 'unitMeasure',
                         "resizable": "enabled",
-                        'headerStyle': "color : black;font-size: 1em;font-weight: 600;  width: 5em;text-align: center;",
+                        'headerStyle': "color : black;font-size: 1em;font-weight: 600;  width: 4em;text-align: center;",
                     }, {
                         "headerText": 'Product Price',
                         "sortProperty": 'costPerItem',
                         "headerClassName": 'kn-table-header-class',
                         "field": 'costPerItem',
                         "resizable": "enabled",
-                        'headerStyle': "color : black;font-size: 1em;font-weight: 600;width: 5em;text-align: center;",
+                        'headerStyle': "color : black;font-size: 1em;font-weight: 600;width: 4em;text-align: center;",
                     },
 
                     {
@@ -350,7 +350,7 @@ define(['require', 'ojs/ojcore', 'knockout', 'knockout', 'ojs/ojrouter', 'appCon
                         "headerClassName": 'kn-table-header-class',
                         "field": 'quantityOrdered',
                         "resizable": "enabled",
-                        'headerStyle': "color : black;font-size: 1em;font-weight: 600;width: 5em;text-align: center;",
+                        'headerStyle': "color : black;font-size: 1em;font-weight: 600;width: 4em;text-align: center;",
                     }
 
 
@@ -363,7 +363,7 @@ define(['require', 'ojs/ojcore', 'knockout', 'knockout', 'ojs/ojrouter', 'appCon
                         "resizable": "enabled",
                         "headerClassName": 'kn-table-header-class',
                         "style": "color : green",
-                        'headerStyle': "color : green;font-size: 1em;font-weight: 600;width: 5em; text-align: center;",
+                        'headerStyle': "color : green;font-size: 1em;font-weight: 600;width: 3em; text-align: center;",
                     });
                 }
                 return dataArray;
