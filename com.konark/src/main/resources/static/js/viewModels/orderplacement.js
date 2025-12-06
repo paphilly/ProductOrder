@@ -306,12 +306,20 @@ define(['require', 'ojs/ojcore', 'knockout', 'knockout', 'ojs/ojrouter', 'appCon
                         'headerStyle': "color : black;font-size: 1em;font-weight: 600; width: 10em;",
                     },
                     {
-                        "headerText": 'Part Number',
+                        "headerText": 'PartNumber',
                         "headerClassName": 'kn-table-header-class',
                         "sortProperty": 'vendorPartNumber',
                         "field": 'vendorPartNumber',
                         "resizable": "enabled",
-                        'headerStyle': "color : black;font-size: 1em;font-weight: 600; width: 10em;",
+                        'headerStyle': "color : black;font-size: 1em;font-weight: 600; width: 9em;",
+                    },
+                    {
+                        "headerText": 'ItemNumber',
+                        "headerClassName": 'kn-table-header-class',
+                        "sortProperty": 'itemNumber',
+                        "field": 'itemNumber',
+                        "resizable": "enabled",
+                        'headerStyle': "color : black;font-size: 1em;font-weight: 600; width: 9em;",
                     },
                     {
                         "headerText": 'Category',
@@ -342,7 +350,7 @@ define(['require', 'ojs/ojcore', 'knockout', 'knockout', 'ojs/ojrouter', 'appCon
                         "headerClassName": 'kn-table-header-class',
                         "field": 'quantityOrdered',
                         "resizable": "enabled",
-                        'headerStyle': "color : black;font-size: 1em;font-weight: 600;width: 8em;text-align: center;",
+                        'headerStyle': "color : black;font-size: 1em;font-weight: 600;width: 5em;text-align: center;",
                     }
 
 

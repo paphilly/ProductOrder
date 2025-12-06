@@ -140,7 +140,9 @@
                                             </td>
                                             <td data-bind="click: function (data) { productTableSelectionListener(row.data.itemNumber) } ">
                                                 <oj-bind-text value="[[row.data.vendorPartNumber]]"></oj-bind-text>
-
+                                            </td>
+                                            <td data-bind="click: function (data) { productTableSelectionListener(row.data.itemNumber) } ">
+                                                <oj-bind-text value="[[row.data.itemNumber]]"></oj-bind-text>
                                             </td>
                                             <td data-bind="click: function (data) { productTableSelectionListener(row.data.itemNumber) }">
                                                 <oj-bind-text value="[[row.data.category]]"></oj-bind-text>
