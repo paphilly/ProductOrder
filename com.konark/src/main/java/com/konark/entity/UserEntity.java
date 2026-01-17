@@ -9,10 +9,10 @@ public class UserEntity {
 
 	@Id
 	@Column(name = "Username")
-	private String Username;
+	private String username;
 
 	@Column(name = "Password")
-	private String Password;
+	private String password;
 
 	@Column(name = "Active")
 	private String isActive;
@@ -24,20 +24,24 @@ public class UserEntity {
 
 	@Column(name = "UserJson")
 	private String userJson;
+
+	@Column(name = "Email")
+	private String email;
+
 	public String getUsername() {
-		return Username;
+		return username;
 	}
 
 	public void setUsername(String username) {
-		Username = username;
+		this.username = username;
 	}
 
 	public String getPassword() {
-		return Password;
+		return password;
 	}
 
 	public void setPassword(String password) {
-		Password = password;
+		this.password = password;
 	}
 
 	public String getIsActive() {
@@ -64,6 +68,12 @@ public class UserEntity {
 		Role = role;
 	}
 
+	public void setEmail(String email) {
+		 username = email;
+	}
+	public String getEmail() {
+		return email;
+	}
 
 
 

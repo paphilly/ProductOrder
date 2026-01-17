@@ -17,10 +17,28 @@ public class UserModel {
 	private String role;
 	
 	private String userJSON;
-	
+
+	private String email;
+
+	public UserInfo getUserInfo() {
+
+		return userInfo;
+	}
+
+	public void setUserInfo( UserInfo userInfo ) {
+
+		this.userInfo = userInfo;
+	}
+
+	private UserInfo userInfo;
 
 	public String getPassword() {
 		return password;
+	}
+
+	public String getEmail() {
+
+		return email;
 	}
 
 	public void setPassword(String password) {
@@ -57,5 +75,10 @@ public class UserModel {
 
 	public void setUsername(String username) {
 		this.username = username;
+	}
+
+	public void setEmail( String email ) {
+
+		this.email = email;
 	}
 }

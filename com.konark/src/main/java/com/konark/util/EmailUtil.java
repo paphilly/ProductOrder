@@ -25,6 +25,13 @@ public class EmailUtil {
 
 	public void sendEmailWithAttachment(String filename) {
 
+//
+//		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+//		Claims claims = (Claims) auth.getDetails();
+//
+//		Long userId = claims.get("userId", Long.class);
+//		String department = claims.get("dept", String.class);
+//
 		MimeMessage message = javaMailSender.createMimeMessage();
 
 		MimeMessageHelper helper;

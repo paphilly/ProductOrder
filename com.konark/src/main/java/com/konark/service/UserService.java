@@ -9,9 +9,11 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.konark.entity.UserEntity;
+import com.konark.model.UserInfo;
 import com.konark.model.UserModel;
 import com.konark.repository.UserRepository;
 import com.konark.util.ApplicationUtils;
+import com.konark.util.JsonUtil;
 
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -30,6 +32,18 @@ public class UserService {
 		}
 
 		return userModel;
+	}
+
+	public UserModel findUser(UserModel userModel) {
+		UserEntity userEntity = userRepository.findByUsernameAndPassword(userModel.getUsername(),userModel.getPassword());
+		if (userEntity != null) {
+			userModel.setUserJSON(userEntity.getUserJson());
+			userModel.setRole(userEntity.getRole());
+			userModel.setEmail( userEntity.getEmail() );
+			userModel.setUserInfo( JsonUtil.fromJson( userEntity.getUserJson(), UserInfo.class));
+			return userModel;
+		}
+		return null;
 	}
 
 
