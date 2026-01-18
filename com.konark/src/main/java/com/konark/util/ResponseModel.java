@@ -9,25 +9,31 @@ import java.util.Map;
 
 public class ResponseModel {
 
+   private Map<String, Object> data = new HashMap<String, Object>();
 
-   private Map <String, Object> data = new HashMap <String, Object>();
-
-
-   public Map <String, Object> getData() {
+   public Map<String, Object> getData() {
       return data;
    }
 
-
-   public void setData( Map <String, Object> data ) {
+   public void setData(Map<String, Object> data) {
       this.data = data;
    }
 
-
-   public void addModel( Object pageModel ) {
-      this.data.put( pageModel.getClass().getSimpleName(), pageModel );
+   public void addModel(Object pageModel) {
+      this.data.put(pageModel.getClass().getSimpleName(), pageModel);
    }
 
-   public void addModel( String name, Object pageModel ) {
-      this.data.put( name, pageModel );
+   private String message;
+
+   public String getMessage() {
+      return message;
+   }
+
+   public void setMessage(String message) {
+      this.message = message;
+   }
+
+   public void addModel(String name, Object pageModel) {
+      this.data.put(name, pageModel);
    }
 }

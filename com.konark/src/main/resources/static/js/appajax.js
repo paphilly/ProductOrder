@@ -21,6 +21,9 @@ function ( oj, ko, $ ) {
 					},
 					beforeSend : function ( xhr ) {
 						xhr.setRequestHeader( 'jSessionIDHeader', sessionStorage.getItem( 'jSessionIDHeader' ) );
+						if (localStorage.getItem('token')) {
+							xhr.setRequestHeader('Authorization', 'Bearer ' + localStorage.getItem('token'));
+						}
 					},
 					async : async,
 					crossDomain : false,

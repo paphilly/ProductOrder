@@ -26,30 +26,44 @@ public class UserService {
 
 		List<Object[]> queriedUser = userRepository.authenticateUser(userModel.getUsername(), userModel.getPassword());
 		if (queriedUser.size() > 0) {
-			  userModel.setUserJSON(ApplicationUtils.getString(queriedUser.get(0)[4]));
-			  userModel.setUsername(ApplicationUtils.getString(queriedUser.get(0)[0]));
-			  userModel.setRole(ApplicationUtils.getString(queriedUser.get(0)[2]));
+			userModel.setUserJSON(ApplicationUtils.getString(queriedUser.get(0)[4]));
+			userModel.setUsername(ApplicationUtils.getString(queriedUser.get(0)[0]));
+			userModel.setRole(ApplicationUtils.getString(queriedUser.get(0)[2]));
 		}
 
 		return userModel;
 	}
 
 	public UserModel findUser(UserModel userModel) {
-		UserEntity userEntity = userRepository.findByUsernameAndPassword(userModel.getUsername(),userModel.getPassword());
+		UserEntity userEntity = userRepository.findByUsernameAndPassword(userModel.getUsername(),
+				userModel.getPassword());
 		if (userEntity != null) {
 			userModel.setUserJSON(userEntity.getUserJson());
 			userModel.setRole(userEntity.getRole());
-			userModel.setEmail( userEntity.getEmail() );
-			userModel.setUserInfo( JsonUtil.fromJson( userEntity.getUserJson(), UserInfo.class));
+			userModel.setEmail(userEntity.getEmail());
+			userModel.setUserInfo(JsonUtil.fromJson(userEntity.getUserJson(), UserInfo.class));
 			return userModel;
 		}
 		return null;
 	}
 
-
 	public boolean isUserExists(String userName) {
 		Optional<UserEntity> user = userRepository.findById(userName);
 		return user.isPresent();
+	}
+
+	public UserModel getUserByUsername(String username) {
+		Optional<UserEntity> userEntityOpt = userRepository.findById(username);
+		if (userEntityOpt.isPresent()) {
+			UserEntity userEntity = userEntityOpt.get();
+			UserModel userModel = new UserModel();
+			userModel.setUsername(userEntity.getUsername());
+			userModel.setRole(userEntity.getRole());
+			userModel.setEmail(userEntity.getEmail());
+			userModel.setUserInfo(JsonUtil.fromJson(userEntity.getUserJson(), UserInfo.class));
+			return userModel;
+		}
+		return null;
 	}
 
 	public Boolean createUser(UserModel userModel) {

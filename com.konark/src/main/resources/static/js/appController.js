@@ -75,6 +75,7 @@ define(['knockout', 'ojs/ojmodule-element-utils', 'ojs/ojknockouttemplateutils',
 				if (now - setupTime > hours * 60 * 60 * 1000) {
 					// if(now-setupTime >  60*1000) { //when 60 seconds
 					localStorage.clear();
+					localStorage.removeItem('token');
 				}
 
 				self.initials(localStorage.getItem('initials'));
@@ -197,19 +198,31 @@ define(['knockout', 'ojs/ojmodule-element-utils', 'ojs/ojknockouttemplateutils',
 
 				var apiURL = self.serviceURL('login');
 				app.ajax("POST", apiURL, function (responseModel, username) {
-
-					if (responseModel.data.UserModel.userJSON != null) {
-						self.initials(JSON.parse(responseModel.data.UserModel.userJSON).firstname.substring(0, 1).toUpperCase() + JSON.parse(responseModel.data.UserModel.userJSON).lastname.substring(0, 1).toUpperCase());
-						self.loggedInUser(responseModel.data.UserModel.username);
-						localStorage.setItem('userJson', responseModel.data.UserModel.userJSON);
-						self.configureScreens(JSON.parse(responseModel.data.UserModel.userJSON));
-						createLocalSession();
-						self.userAuthenticated(responseModel.data.UserModel != null);
+					if (responseModel.data.token) {
+						localStorage.setItem('token', responseModel.data.token);
+						self.getUserDetails();
 					} else {
 						self.loginError(true);
 					}
-
 				}, ko.toJSON(postModel), 'JSON', 'application/json');
+			};
+
+			self.getUserDetails = function () {
+				var apiURL = self.serviceURL('user/details');
+				app.ajax("GET", apiURL, function (responseModel) {
+					if (responseModel.data.userModel.userInfo != null) {
+						var userInfo = responseModel.data.userModel.userInfo;
+						self.initials(userInfo.firstname.substring(0, 1).toUpperCase() + userInfo.lastname.substring(0, 1).toUpperCase());
+						self.loggedInUser(responseModel.data.userModel.username);
+						localStorage.setItem('userJson', JSON.stringify(userInfo));
+						
+						self.configureScreens(userInfo);
+						createLocalSession();
+						self.userAuthenticated(responseModel.data.userModel.username != null);
+					} else {
+						self.loginError(true);
+					}
+				}, null, 'JSON', 'application/json');
 			};
 
 			self.userExistsAlready = ko.observable(true);
