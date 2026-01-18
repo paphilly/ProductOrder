@@ -16,18 +16,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	private JwtFilter jwtFilter;
 
 	@Override
-	protected void configure( HttpSecurity http) throws Exception {
+	protected void configure(HttpSecurity http) throws Exception {
 		http
-			.cors()
-			.and()
-			.csrf().disable()
-			.authorizeRequests()
-		//	.antMatchers("/auth/**").permitAll()
-			.antMatchers("/login").permitAll()
-			.anyRequest().authenticated()
-			.and()
-			.sessionManagement()
-			.sessionCreationPolicy( SessionCreationPolicy.STATELESS);
+				.cors()
+				.and()
+				.csrf().disable()
+				.authorizeRequests()
+				// .antMatchers("/auth/**").permitAll()
+				.antMatchers("/login", "/", "/index.html", "/css/**", "/js/**").permitAll()
+				.anyRequest().authenticated()
+				.and()
+				.sessionManagement()
+				.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
 		http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 	}
