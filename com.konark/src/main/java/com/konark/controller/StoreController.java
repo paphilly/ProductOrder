@@ -34,20 +34,24 @@ public class StoreController {
 		List<StoreEntity> storeEntities = storeService.getAllStores();
 
 		
-//		stores.put("Omaha", "1234");
-//		stores.put("Namaste", "2345");
-//		stores.put("DesMoines", "3456");
-//		stores.put("Parker", "6789");
-//		stores.put("Omaha Web", "1001");
+
+//		stores.put("Aurora", "7890");
+//		stores.put("Charlotte", "8901");
 //		stores.put("Denver", "5678");
-//		    	  
-		stores.put("Aurora", "7890");
-		stores.put("Charlotte", "8901");
-		stores.put("Denver", "5678");
+//		stores.put("Desmoines", "3456");
+//		stores.put("Maple", "4567");
+//		stores.put("Namaste", "2345");
+//		stores.put("Omaha", "1234");
+//		stores.put("Parker", "6789");
+//		stores.put("StLouis", "9012");
+
+		stores.put("Aurora", "9999");
+		stores.put("Charlotte", "9999");
+		stores.put("Denver", "9999");
 		stores.put("Desmoines", "3456");
 		stores.put("Maple", "4567");
 		stores.put("Namaste", "2345");
-		stores.put("Omaha", "1234");
+		stores.put("Omaha", "9999");
 		stores.put("Parker", "6789");
 		stores.put("StLouis", "9012");
 

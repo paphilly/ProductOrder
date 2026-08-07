@@ -11,7 +11,8 @@ import javax.persistence.Table;
 import com.konark.entity.pk.InvoiceItemizedPK;
 
 @Entity
-@Table(name = "vw_AllInvoiceItemized")
+//@Table(name = "vw_AllInvoiceItemized")
+@Table(name = "Invoice_Itemized")
 @IdClass(InvoiceItemizedPK.class)
 public class InvoiceItemizedEntity {
 	
