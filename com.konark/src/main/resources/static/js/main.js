@@ -12,6 +12,10 @@
   requirejs.config(
     {
       baseUrl: 'js',
+      // Keep RequireJS modules in sync with the deployed UI bundle.  This is
+      // especially important for the order table because a cached view model
+      // cannot observe a newly returned product data provider.
+      urlArgs: 'build=20260904-2',
       paths:      {
         'knockout': 'libs/knockout/knockout-3.5.1.debug',
         'jquery': 'libs/jquery/jquery-3.5.1',

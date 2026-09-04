@@ -24,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.konark.dto.VendorInventoryProjection;
 import com.konark.entity.InventoryEntity;
-import com.konark.entity.VendorEntity;
 import com.konark.entity.VendorItemEntity;
 import com.konark.entity.pk.VendorItemPK;
 import com.konark.model.ProductItemModel;
@@ -33,7 +32,6 @@ import com.konark.model.VendorItemModel;
 import com.konark.repository.InventoryRepository;
 import com.konark.repository.VendorItemRepository;
 import com.konark.repository.VendorRepository;
-import com.konark.util.LevenshteinWordSearch;
 
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -161,14 +159,16 @@ public class VendorItemService {
 //		 
 //		 List<VendorInventoryProjection> results = vendorItemRepository.findByStoreIdAndVendorNumber(storeID, vendorNumber);
 
-		 List<VendorInventoryProjection> vendorItemResults = vendorItemRepository.findConsolidatedItemsByVendorNumber( vendorNumber);
+		 List<VendorInventoryProjection> vendorItemResults = vendorItemRepository.findConsolidatedItemsByVendorNumber( vendorNumber, storeID);
 
+			try (java.io.FileWriter fw = new java.io.FileWriter("C:/ProductOrder/vendor_item_debug.log", true)) {
+				fw.write("Vendor 8 query results count: " + (vendorItemResults != null ? vendorItemResults.size() : -1) + " for vendor=" + vendorNumber + " store=" + storeID + "\n");
+			} catch (Exception ignored) {}
 
 			vendorItemResults.forEach(vendorItem -> {
 
 				ProductItemModel productItemModel = new ProductItemModel();
 
-				System.out.println("Failed One " + vendorItem.getItemName() + ":"+ vendorItem.getItemNum());
 				productItemModel.setDepartment(vendorItem.getDescription());
 				productItemModel.setCategory( vendorItem.getCategory() );
 				productItemModel.setItemName(vendorItem.getItemName());
@@ -179,52 +179,34 @@ public class VendorItemService {
 				productItemModel.setCostPerItem(vendorItem.getCostPer());
 				productItemModel.setCaseCost(vendorItem.getCaseCost());
 				productItemModel.setVendorItemName(vendorItem.getItemName());
+
+				if (vendorItem.getInStock() != null && !vendorItem.getInStock().trim().isEmpty()) {
+					try {
+						productItemModel.setQuantityInStock(new java.math.BigDecimal(vendorItem.getInStock().trim()));
+						productItemModel.setInventoryFlag(true);
+					} catch (Exception e) {
+						productItemModel.setQuantityInStock(java.math.BigDecimal.ZERO);
+					}
+				}
+
 				vendorItems.add(productItemModel);
 
 			});
 			
-			Iterable<InventoryEntity> inventoryResults = inventoryRepository.findStoreInventoryByVendorNumber(vendorNumber,	storeID);
-
-			for (InventoryEntity inventoryItem : inventoryResults) {
-				for (ProductItemModel vendorItem : vendorItems) {
-
-					if (vendorItem.getItemName().equals(inventoryItem.getItemName())) {
-						vendorItem.setQuantityInStock(inventoryItem.getQuantityInStock());
-						vendorItem.setInventoryFlag(true);					
-						break;
-					}				
-				}
-			}
-
-			int count = 0;
-
-			for (ProductItemModel item : vendorItems) {
-				if (item.getInventoryFlag()) {
-					count++;
-				}
-
-			}
-			System.out.println("inventory count" + count);
-			productOrderModel.setProductItems(vendorItems);
+			ProductOrderModel responseOrderModel = new ProductOrderModel();
+			responseOrderModel.setVendorNumber(vendorNumber);
+			responseOrderModel.setStoreID(storeID);
+			responseOrderModel.setProductItems(vendorItems);
 			
-		return productOrderModel;
+		return responseOrderModel;
 	}
 
-	public ProductOrderModel getReferenceVendorItems(String itemName, String vendorNumber) {
+	public ProductOrderModel getReferenceVendorItems(String itemNumber, String vendorNumber) {
 
-		Map<String, String> vendorMap = new HashMap<String, String>();
-		
-		Iterable<VendorEntity> allVendors = vendorRepository.findAll();
-
-		allVendors.forEach(vendor -> {
-			vendorMap.put(vendor.getVendorNumber(), vendor.getCompany());
-		});
-	//	Iterable<VendorItemEntity> vendorItems = vendorItemRepository.findByItemNumberContainingAndVendorNumberNotIn(itemName, vendorNumbers);
-		List<VendorInventoryProjection> referenceVendorItems = vendorItemRepository.findReferenceVendorItems(vendorNumber);
-
-	//	List<VendorItemEntity> matchingVendorItems = LevenshteinItemSearch.findAlternateItemsByLevenshtein(itemName,vendorItems);
-		
-		List<VendorInventoryProjection> matchingVendorItems = LevenshteinWordSearch.findSimilarItems(referenceVendorItems, itemName);
+		// Central store 9999 is the vendor-reference master. Return every vendor
+		// mapping for the exact product identity, including the selected vendor.
+		List<VendorInventoryProjection> matchingVendorItems = vendorItemRepository
+				.findReferenceVendorItems(itemNumber);
 		
 		
 		List<ProductItemModel> matchingProductItems = new ArrayList<ProductItemModel>();

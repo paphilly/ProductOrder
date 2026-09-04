@@ -1,10 +1,10 @@
 package com.konark.repository;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 
 import com.konark.entity.BillPayEntity;
 
@@ -17,17 +17,18 @@ public interface AccountsPayableRepository extends CrudRepository<BillPayEntity,
 //	List<BillPayEntity> findAccountsPayableForPast60DaysByLocation(String location);
 	
 	@Query(value = "SELECT * from Bill where TxnDate > DATEADD(DAY, -60, GETDATE()) AND SalesTermRefName IN (:locations)", nativeQuery = true)
-	List<BillPayEntity> findAccountsPayableForPast60DaysByLocations(String[] locations);
+	List<BillPayEntity> findAccountsPayableForPast60DaysByLocations(@Param("locations") String[] locations);
 	
 	@Query(value = "SELECT * from Bill where TxnDate > DATEADD(DAY, -60, GETDATE()) AND SalesTermRefName IS NULL", nativeQuery = true)
 	List<BillPayEntity> findUnassignedAccountsPayableForPast60Days();
 	
-	@Query(value = "SELECT VendorRefId,VendorRefName FROM Bill b WHERE b.SalesTermRefName IN (:locations)", nativeQuery = true)
-	List<Object[]> findVendorsByLocation(String[] locations);
+	@Query(value = "SELECT DISTINCT CAST(VendorRefId AS NVARCHAR(255)), CAST(VendorRefName AS NVARCHAR(255)) FROM Bill b WHERE b.SalesTermRefName IN (:locations)", nativeQuery = true)
+	List<Object[]> findVendorsByLocation(@Param("locations") String[] locations);
 	
-	@Query(value = "SELECT VendorRefId,VendorRefName FROM Bill b WHERE b.SalesTermRefName IS NULL", nativeQuery = true)
+	@Query(value = "SELECT DISTINCT CAST(VendorRefId AS NVARCHAR(255)), CAST(VendorRefName AS NVARCHAR(255)) FROM Bill b WHERE b.SalesTermRefName IS NULL", nativeQuery = true)
 	List<Object[]> findUnassignedVendors();
 	
-	@Query(value = "SELECT DISTINCT SalesTermRefName FROM Bill b", nativeQuery = true)
+	@Query(value = "SELECT DISTINCT CAST(SalesTermRefName AS NVARCHAR(255)) FROM Bill b WHERE SalesTermRefName IS NOT NULL", nativeQuery = true)
 	List<String> findDistinctLocation();
 }
+

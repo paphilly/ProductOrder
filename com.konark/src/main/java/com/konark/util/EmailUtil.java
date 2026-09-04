@@ -20,9 +20,6 @@ public class EmailUtil {
 	@Autowired
 	private JavaMailSender javaMailSender;
 
-	@Autowired
-	private EmailUtil emailUtil;
-
 	public void sendEmailWithAttachment(String filename) {
 
 //
@@ -99,7 +96,7 @@ public class EmailUtil {
 
 		try {
 
-		emailUtil.sendEmailWithAttachment(filename);
+		sendEmailWithAttachment(filename);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

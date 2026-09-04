@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.konark.model.VendorModel;
@@ -22,10 +23,13 @@ public class VendorController {
 	VendorService vendorService;
 
 	@GetMapping("")
-	private ResponseEntity<ResponseModel> getAllVendors() {
+	private ResponseEntity<ResponseModel> getAllVendors(
+			@RequestParam(value = "storeID", required = false) String storeID) {
 		
 		ResponseModel responseModel = new ResponseModel();
-		VendorModel vendorModel = vendorService.getAllVendors();
+		VendorModel vendorModel = storeID == null || storeID.trim().isEmpty()
+				? vendorService.getAllVendors()
+				: vendorService.getVendorsByStoreID(storeID);
 		responseModel.addModel(VendorModel.class.getSimpleName(), vendorModel);
 		return ApplicationUtils.buildOkResponse(responseModel);
 	}

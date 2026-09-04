@@ -21,21 +21,34 @@ public class SalesHistoryService {
 	SalesHistoryRepository salesHistoryRepository;
 
 	public List<Object[]> getSalesHistorybyItemNumberAndStore(String itemNumber, String storeID) {
-
-		List<Object[]> salesHistory = salesHistoryRepository.findSalesHistoryByItemNumberAndStore(itemNumber, storeID);
-
-		return salesHistory;
+		try {
+			List<Object[]> salesHistory = salesHistoryRepository.findSalesHistoryByItemNumberAndStore(itemNumber, storeID);
+			try (java.io.FileWriter fw = new java.io.FileWriter("C:/ProductOrder/sales_debug.log", true)) {
+				fw.write("SUCCESS for item: " + itemNumber + " store: " + storeID + " rows: " + (salesHistory != null ? salesHistory.size() : 0) + "\n");
+				if (salesHistory != null && !salesHistory.isEmpty()) {
+					Object[] row = salesHistory.get(0);
+					fw.write("ROW: " + java.util.Arrays.toString(row) + "\n");
+				}
+			} catch (Exception ignored) {}
+			return salesHistory;
+		} catch (Exception e) {
+			try (java.io.FileWriter fw = new java.io.FileWriter("C:/ProductOrder/sales_debug.log", true)) {
+				fw.write("ERROR for item: " + itemNumber + " store: " + storeID + " EXCEPTION: " + e.toString() + "\n");
+				java.io.PrintWriter pw = new java.io.PrintWriter(fw);
+				e.printStackTrace(pw);
+			} catch (Exception ignored) {}
+			return new java.util.ArrayList<>();
+		}
 	}
 
 	public Map<String, String> getTotalSaleByStoreID(String storeID) {
-
-		List<Object[]> totalSales = salesHistoryRepository.getTotalSaleByStoreID(storeID);
-
 		Map<String, String> salesMap = new HashMap<String, String>();
-
-		BigDecimal div = new BigDecimal(4);
-		totalSales.stream().forEach(resultRow -> salesMap.put(((Date) resultRow[0]).toString(), (((BigDecimal)resultRow[1]).divide(div)).toString()));
-
+		try {
+			List<Object[]> totalSales = salesHistoryRepository.getTotalSaleByStoreID(storeID);
+			totalSales.stream().forEach(resultRow -> salesMap.put(((Date) resultRow[0]).toString(), ((BigDecimal) resultRow[1]).toString()));
+		} catch (Exception e) {
+			// Return empty map on error
+		}
 		return salesMap;
 	}
 
