@@ -163,4 +163,3 @@ SELECT N'$(AuroraStoreId)' AS store_id,
           ON inventory.ItemNum = sales.ItemNum
          AND inventory.Store_ID = sales.Store_ID
         WHERE sales.Store_ID = N'$(AuroraStoreId)') AS sales_lines_with_product_match;
-

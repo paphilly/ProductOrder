@@ -32,6 +32,7 @@
                         <div class=" oj-flex-item oj-sm-12 oj-md-2 oj-lg-2 oj-sm-padding-2x-start oj-sm-padding-2x-top oj-sm-padding-2x-end">
                             <div class=" oj-sm-padding-1x-bottom  oj-typography-semi-bold" style="">Order Total :   </div>
                             <span style=" color : green;font-size: 1.5em;font-weight: 600;"  data-bind="text: '$' + orderTotalValue()"></span>
+	                        <div style="font-size: 0.8em; color: #5f6f16; margin-top: 4px;" data-bind="text: draftSaveStatus"></div>
                         </div>
                     </oj-bind-if>
                 </div>
@@ -44,6 +45,17 @@
                                           placeholder="Select a Vendor from the list..."
                                           on-oj-value-action="[[vendorValueActionHandler]]"
                                           value="{{vendorSelectValue}}"
+                                          style="max-width: 26em;">
+                        </oj-select-single>
+                    </div>
+                    <div class=" oj-flex-item oj-sm-12 oj-md-4 oj-lg-4 oj-sm-padding-2x-start oj-sm-padding-2x-top oj-sm-padding-2x-end">
+                        <div class="oj-sm-padding-1x-bottom oj-typography-semi-bold">Saved Drafts</div>
+                        <oj-select-single id="saved-drafts"
+                                          class="kn-dropdown-icon-color"
+                                          data="[[draftDP]]"
+                                          placeholder="Open a saved draft..."
+                                          on-oj-value-action="[[savedDraftValueActionHandler]]"
+                                          value="{{savedDraftSelectValue}}"
                                           style="max-width: 26em;">
                         </oj-select-single>
                     </div>
@@ -140,7 +152,7 @@
 
                                             </td>
                                             <td data-bind="click: function (data) { productTableSelectionListener(row.data.itemNumber) } ">
-                                                <oj-bind-text value="[[row.data.vendorPartNumber]]"></oj-bind-text>
+                                                <oj-bind-text value="[[row.data.vendorPartNumber || '—']]"></oj-bind-text>
                                             </td>
                                             <td data-bind="click: function (data) { productTableSelectionListener(row.data.itemNumber) } ">
                                                 <oj-bind-text value="[[row.data.itemNumber]]"></oj-bind-text>
@@ -166,7 +178,7 @@
                                             </td>
                                             <oj-bind-if test="[[storeInventorySwitchValue()]]">
                                                 <td style="text-align: center;"  data-bind="click: function (data) { productTableSelectionListener(row.data.itemNumber) }">
-                                                    <oj-bind-text value="[[row.data.quantityInStock]]"></oj-bind-text>
+                                                    <oj-bind-text value="[[row.data.quantityInStock == null ? 0 : row.data.quantityInStock]]"></oj-bind-text>
                                                 </td>
                                             </oj-bind-if>
                                         </tr>
@@ -367,7 +379,7 @@
                                             <oj-bind-text value="[[row.data.itemName]]"></oj-bind-text>
                                         </td>
                                         <td style="text-align: center;" >
-                                            <oj-bind-text value="[[row.data.quantityInStock]]"></oj-bind-text>
+                                            <oj-bind-text value="[[row.data.quantityInStock == null ? 0 : row.data.quantityInStock]]"></oj-bind-text>
                                         </td>
                                     </tr>
                                 </template>

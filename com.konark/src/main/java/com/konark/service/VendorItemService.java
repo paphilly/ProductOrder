@@ -182,17 +182,21 @@ public class VendorItemService {
 
 				if (vendorItem.getInStock() != null && !vendorItem.getInStock().trim().isEmpty()) {
 					try {
-						productItemModel.setQuantityInStock(new java.math.BigDecimal(vendorItem.getInStock().trim()));
+						java.math.BigDecimal inStock = new java.math.BigDecimal(vendorItem.getInStock().trim());
+						productItemModel.setQuantityInStock(inStock);
+						// A local inventory row remains inventory even when its current
+						// quantity is zero; only missing local rows are catalog-only items.
 						productItemModel.setInventoryFlag(true);
 					} catch (Exception e) {
 						productItemModel.setQuantityInStock(java.math.BigDecimal.ZERO);
+						productItemModel.setInventoryFlag(false);
 					}
 				}
 
 				vendorItems.add(productItemModel);
 
 			});
-			
+
 			ProductOrderModel responseOrderModel = new ProductOrderModel();
 			responseOrderModel.setVendorNumber(vendorNumber);
 			responseOrderModel.setStoreID(storeID);

@@ -12,11 +12,27 @@ public interface SalesHistoryRepository extends CrudRepository<InvoiceItemizedEn
 
 	
 	@Query(value = """
-			WITH inv AS (
-			  SELECT TOP 1 ItemNum, ItemName
-			  FROM vw_AllInventory
-			  WHERE LTRIM(RTRIM(ItemNum)) = LTRIM(RTRIM(:itemNumber))
-			    AND LTRIM(RTRIM(Store_ID)) = LTRIM(RTRIM(:storeID))
+			WITH itemKeys AS (
+			  -- The product grid can contain either the canonical item number or
+			  -- a POS alternate SKU.  Resolve both directions through the
+			  -- store-specific Inventory_SKUs crosswalk before touching invoices.
+			  SELECT LTRIM(RTRIM(:itemNumber)) AS ItemNum
+			  UNION
+			  SELECT LTRIM(RTRIM(sku.ItemNum))
+			  FROM Inventory_SKUs sku
+			  WHERE LTRIM(RTRIM(sku.Store_ID)) IN (LTRIM(RTRIM(:storeID)), '9999')
+			    AND LTRIM(RTRIM(sku.AltSKU)) = LTRIM(RTRIM(:itemNumber))
+			  UNION
+			  SELECT LTRIM(RTRIM(sku.AltSKU))
+			  FROM Inventory_SKUs sku
+			  WHERE LTRIM(RTRIM(sku.Store_ID)) IN (LTRIM(RTRIM(:storeID)), '9999')
+			    AND LTRIM(RTRIM(sku.ItemNum)) = LTRIM(RTRIM(:itemNumber))
+			),
+			inv AS (
+			  SELECT TOP 1 inventory.ItemNum, inventory.ItemName
+			  FROM vw_AllInventory inventory
+			  WHERE LTRIM(RTRIM(inventory.Store_ID)) = LTRIM(RTRIM(:storeID))
+			    AND LTRIM(RTRIM(inventory.ItemNum)) IN (SELECT ItemNum FROM itemKeys)
 			)
 			SELECT COALESCE(MAX(inv.ItemNum), :itemNumber) AS ItemNum,
 			       COALESCE(MAX(inv.ItemName), NULLIF(NULLIF(LTRIM(RTRIM(MAX(invoice.DiffItemName))), ''), :itemNumber), 'NO SALE') AS ITEMNAME,
@@ -26,8 +42,8 @@ public interface SalesHistoryRepository extends CrudRepository<InvoiceItemizedEn
 			FROM (SELECT 1 AS anchor) base
 			LEFT JOIN inv ON 1=1
 			LEFT JOIN vw_AllInvoiceItemized invoice
-			  ON LTRIM(RTRIM(invoice.ItemNum)) = LTRIM(RTRIM(:itemNumber))
-			 AND LTRIM(RTRIM(invoice.Store_ID)) = LTRIM(RTRIM(:storeID))
+			  ON LTRIM(RTRIM(invoice.Store_ID)) = LTRIM(RTRIM(:storeID))
+			 AND LTRIM(RTRIM(invoice.ItemNum)) IN (SELECT ItemNum FROM itemKeys)
 			""", nativeQuery = true)
 	List<Object[]> findSalesHistoryByItemNumberAndStore(@Param("itemNumber") String itemNumber, @Param("storeID") String storeID);
 

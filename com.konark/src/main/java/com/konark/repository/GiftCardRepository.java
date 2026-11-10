@@ -26,4 +26,3 @@ public interface GiftCardRepository extends CrudRepository<OrderEntity, String> 
 	List<Object[]> findCustomersByMobileNumber(@Param("mobileNumber") String mobileNumber, @Param("giftCardNumber") String giftCardNumber);
 	
 }
-

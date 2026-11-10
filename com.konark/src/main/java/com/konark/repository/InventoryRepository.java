@@ -29,12 +29,12 @@ public interface InventoryRepository extends CrudRepository<InventoryEntity, Inv
 	 * that a selected store is never silently served from Central.Inventory.
 	 */
 	@Query(value = "SELECT ItemNum, Store_ID, Vendor_Number, Vendor_Part_Num, "
-			+ "CASE WHEN In_Stock < 0 THEN CAST(0 AS decimal(18,8)) ELSE In_Stock END AS In_Stock, ItemName "
+			+ "In_Stock, ItemName "
 			+ "FROM vw_AllInventory WHERE Store_ID = :storeID", nativeQuery = true)
 	List<InventoryEntity> findCanonicalByStoreID(@Param("storeID") String storeID);
 
 	@Query(value = "SELECT inv.ItemNum, inv.Store_ID, inv.Vendor_Number, inv.Vendor_Part_Num, "
-			+ "CASE WHEN inv.In_Stock < 0 THEN CAST(0 AS decimal(18,8)) ELSE inv.In_Stock END AS In_Stock, inv.ItemName "
+			+ "inv.In_Stock, inv.ItemName "
 			+ "FROM vw_AllInventory inv "
 			+ "WHERE inv.Store_ID = :storeID "
 			+ "AND EXISTS (SELECT 1 FROM vw_AllInventoryVendors link "

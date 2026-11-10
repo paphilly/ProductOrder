@@ -18,6 +18,15 @@ define(['require', 'ojs/ojcore', 'knockout', 'knockout', 'ojs/ojrouter', 'appCon
             self.productOrderLoading = ko.observable(false);
             self.disabledClass = ko.observable();
             self.orderTotalValue = ko.observable(0);
+            self.draftOrderID = ko.observable(null);
+            self.draftSaveStatus = ko.observable('');
+            self.draftSaveInProgress = ko.observable(false);
+            self.draftSaveTimer = null;
+            self.pendingPlaceOrder = false;
+            self.savedDraftSelectValue = ko.observable();
+            self.draftDP = ko.observable(new oj.ArrayDataProvider([], {
+                keyAttributes: "value"
+            }));
             self.vendorSelectValue = ko.observable();
             // Give oj-select-single a data provider from its first render.
             // Leaving this undefined during its initial upgrade can cause the
@@ -123,7 +132,7 @@ define(['require', 'ojs/ojcore', 'knockout', 'knockout', 'ojs/ojrouter', 'appCon
 
 
 
-            self.loadVendors = function(storeID) {
+            self.loadVendors = function(storeID, onLoaded) {
                 self.showMessage(false);
 
                 var params = {};
@@ -137,6 +146,10 @@ define(['require', 'ojs/ojcore', 'knockout', 'knockout', 'ojs/ojrouter', 'appCon
                     }));
                     self.loadingStatus.isBusy(false);
                     self.loadingStatus.isLoaded(true);
+
+                    if (typeof onLoaded === 'function') {
+                        onLoaded();
+                    }
 
                     // The provider assignment above is the render trigger.  The
                     // optional animation previously threw in some JET upgrade
@@ -161,6 +174,68 @@ define(['require', 'ojs/ojcore', 'knockout', 'knockout', 'ojs/ojrouter', 'appCon
                 return dataArray.sort((a, b) => (a.label > b.label) ? 1 : ((b.label > a.label) ? -1 : 0));
 
             }
+
+            function buildDrafts(input) {
+                return (input || []).map(function(draft) {
+                    var savedAt = draft.orderDate ? new Date(draft.orderDate).toLocaleString() : '';
+                    var total = draft.totalCost == null ? '0.00' : Number(draft.totalCost).toFixed(2);
+                    return {
+                        value: draft.productOrderID,
+                        label: 'Draft #' + draft.productOrderID + ' — ' + (draft.storeName || ('Store ' + draft.storeID))
+                            + ' — ' + (draft.vendorName || ('Vendor ' + draft.vendorNumber)) + ' — $' + total
+                            + (savedAt ? ' — ' + savedAt : '')
+                    };
+                });
+            }
+
+            self.loadSavedDrafts = function(onLoaded) {
+                var apiURL = appControls.serviceURL('productorder/drafts');
+                app.ajax('GET', apiURL, function(responseModel) {
+                    var drafts = responseModel && responseModel.data && responseModel.data.drafts
+                        ? responseModel.data.drafts : [];
+                    self.draftDP(new oj.ArrayDataProvider(buildDrafts(drafts), {
+                        keyAttributes: 'value'
+                    }));
+                    if (typeof onLoaded === 'function') {
+                        onLoaded(drafts);
+                    }
+                }, '', '', 'application/json');
+            };
+
+            self.savedDraftValueActionHandler = function(event) {
+                var context = event.detail && event.detail.itemContext;
+                var draftID = context && context.data ? context.data.value : self.savedDraftSelectValue();
+                if (!draftID) {
+                    return;
+                }
+                loadSavedDraftById(draftID);
+            };
+
+            function loadSavedDraftById(draftID) {
+                self.draftSaveStatus('Loading draft…');
+                var apiURL = appControls.serviceURL('productorder/drafts/' + encodeURIComponent(draftID));
+                app.ajax('GET', apiURL, function(responseModel) {
+                    var draft = responseModel && responseModel.data && responseModel.data.draft;
+                    if (!draft) {
+                        self.draftSaveStatus('Draft could not be loaded');
+                        return;
+                    }
+                    if (self.draftSaveTimer) {
+                        clearTimeout(self.draftSaveTimer);
+                        self.draftSaveTimer = null;
+                    }
+                    self.productDetailsToPost([]);
+                    self.storeSelectValue(draft.storeID);
+                    self.deptSelectValue(['All']);
+                    self.showAllProductsSwitchValue(true);
+                    self.loadVendors(draft.storeID, function() {
+                        self.vendorSelectValue(draft.vendorNumber);
+                        self.loadVendorItemsById(draft.vendorNumber, draft);
+                    });
+                }, '', '', 'application/json');
+            }
+
+            self.loadSavedDrafts();
 
             function buildStores(input) {
                 var dataArray = [];
@@ -438,7 +513,15 @@ define(['require', 'ojs/ojcore', 'knockout', 'knockout', 'ojs/ojrouter', 'appCon
     /*Store Value change handler*/
             self.storeValueActionHandler = (event) => {
                 self.showMessage(false);
-                self.showVendorReferenceSection(true);
+                // Reference and sales panels are item-specific; keep them hidden
+                // until the user selects a product in the catalog.
+                self.showVendorReferenceSection(false);
+                self.showVendorReferenceTable(false);
+                self.showInventoryTable(false);
+                self.showVendorReferenceTableLoading(false);
+                self.showInventoryTableLoading(false);
+                self.salesHistoryTable(false);
+                self.salesHistoryTableLoading(false);
                 self.showAllProductsSwitchValue(true);
                 self.storeInventorySwitchValue(true);
                 self.step(0);
@@ -449,8 +532,9 @@ define(['require', 'ojs/ojcore', 'knockout', 'knockout', 'ojs/ojrouter', 'appCon
 	               self.vendorSelectValue(null);
 	               self.storeInventorySearchDataBackup([]);
 	               self.storeInventorySearchStoreID = null;
-	               self.storeInventorySearchLoading = false;
-	               self.inventorySearchDefaultQuery = '';
+                self.storeInventorySearchLoading = false;
+               self.inventorySearchDefaultQuery = '';
+	               clearDraftState();
 	               self.loadVendors(event.detail.value);
                 
             };
@@ -463,15 +547,34 @@ define(['require', 'ojs/ojcore', 'knockout', 'knockout', 'ojs/ojrouter', 'appCon
                 self.showAllProductsSwitchValue(true);
                 self.storeInventorySwitchValue(true);
                 var vendorValue = (event.detail.itemContext.data.value);
-                self.loadVendorItemsById(vendorValue);
-                self.deptSelectValue(['All']);
+	               if (self.draftOrderID()
+	                       && String(vendorValue) === String(self.vendorSelectValue())) {
+	                   // Re-selecting the vendor for an open draft must keep its
+	                   // order ID, then restore the draft after reloading products.
+	                   loadSavedDraftById(self.draftOrderID());
+	                   return;
+	               }
+	               clearDraftState();
+	                self.deptSelectValue(['All']);
+	                var selectedStore = String(self.storeSelectValue());
+	                self.loadSavedDrafts(function(drafts) {
+	                    var matchingDraft = drafts.find(function(draft) {
+	                        return String(draft.storeID) === selectedStore
+	                            && String(draft.vendorNumber) === String(vendorValue);
+	                    });
+	                    if (matchingDraft) {
+	                        loadSavedDraftById(matchingDraft.productOrderID);
+	                    } else {
+	                        self.loadVendorItemsById(vendorValue);
+	                    }
+	                });
             };
 
 
 
 
             /* Load all product based on given vendor id*/
-            self.loadVendorItemsById = function(vendorId) {
+            self.loadVendorItemsById = function(vendorId, restoredDraft) {
                 self.step(0);
                 self.isProductTableLoad(false);
                 self.isProductTableLoadisBusy(true);
@@ -493,9 +596,27 @@ define(['require', 'ojs/ojcore', 'knockout', 'knockout', 'ojs/ojrouter', 'appCon
                         keyAttributes: "value",
                     });
 
-                    self.productDetailsToPost([]);
+                    if (restoredDraft) {
+                        applyRestoredDraft(restoredDraft);
+                    } else {
+                        clearDraftState();
+                    }
                     self.isProductTableLoad(true);
                     self.isProductTableLoadisBusy(false);
+
+                    if (restoredDraft) {
+                        // The table is removed while its data is loading. Rebind
+                        // after Oracle JET recreates it so restored rows render.
+                        window.requestAnimationFrame(function() {
+                            var restoredProducts = getFilteredProducts();
+                            setProductTableData(restoredProducts);
+                            buildSearchDataProvider(restoredProducts);
+                            var productTable = document.getElementById('producttableid');
+                            if (productTable && typeof productTable.refresh === 'function') {
+                                productTable.refresh();
+                            }
+                        });
+                    }
 
 
 
@@ -805,6 +926,128 @@ define(['require', 'ojs/ojcore', 'knockout', 'knockout', 'ojs/ojrouter', 'appCon
 
             self.productDetailsToPost = ko.observableArray([]);
 
+            function clearDraftState() {
+                if (self.draftSaveTimer) {
+                    clearTimeout(self.draftSaveTimer);
+                    self.draftSaveTimer = null;
+                }
+                self.draftOrderID(null);
+                self.draftSaveStatus('');
+                self.draftSaveInProgress(false);
+                self.pendingPlaceOrder = false;
+                self.productDetailsToPost([]);
+            }
+
+            function draftItemKey(item) {
+                return String(item.itemNumber || '').trim().toUpperCase()
+                    + '|' + String(item.vendorPartNumber || '').trim().toUpperCase();
+            }
+
+            function draftItemNumber(item) {
+                return String(item.itemNumber || '').trim().toUpperCase();
+            }
+
+            function applyRestoredDraft(draft) {
+                var savedItems = {};
+                var savedItemsByNumber = {};
+                (draft.productItems || []).forEach(function(item) {
+                    savedItems[draftItemKey(item)] = item;
+                    var itemNumber = draftItemNumber(item);
+                    if (itemNumber) {
+                        savedItemsByNumber[itemNumber] = savedItemsByNumber[itemNumber] || [];
+                        savedItemsByNumber[itemNumber].push(item);
+                    }
+                });
+
+                var restoredItems = [];
+                var missingItems = 0;
+                var catalog = (self.vendorItemsDataBackup() || []).map(function(item) {
+                    return Object.assign({}, item, { quantityOrdered: null });
+                });
+                catalog.forEach(function(currentItem) {
+                    var savedItem = savedItems[draftItemKey(currentItem)];
+                    if (!savedItem) {
+                        var candidates = savedItemsByNumber[draftItemNumber(currentItem)] || [];
+                        if (candidates.length === 1) {
+                            savedItem = candidates[0];
+                        }
+                    }
+                    if (!savedItem) {
+                        return;
+                    }
+                    var restoredQuantity = Number(savedItem.quantityOrdered);
+                    if (!Number.isFinite(restoredQuantity)) {
+                        missingItems++;
+                        return;
+                    }
+                    currentItem.quantityOrdered = restoredQuantity;
+                    restoredItems.push(currentItem);
+                    delete savedItems[draftItemKey(savedItem)];
+                });
+                Object.keys(savedItems).forEach(function() { missingItems++; });
+
+                // Replace the catalog array as well as its rows so Knockout and
+                // Oracle JET observe restored values instead of retaining the
+                // pre-draft row objects.
+                self.vendorItemsDataBackup(catalog);
+                self.productDetailsToPost(restoredItems);
+                self.draftOrderID(draft.productOrderID);
+                self.savedDraftSelectValue(draft.productOrderID);
+                buildOrderTotalValue();
+                self.isReviewOrder(false);
+                var visibleProducts = getFilteredProducts();
+                setProductTableData(visibleProducts);
+                buildSearchDataProvider(visibleProducts);
+                self.draftSaveStatus(missingItems > 0
+                    ? 'Draft loaded (' + restoredItems.length + ' item(s)); ' + missingItems + ' unavailable item(s) were not restored'
+                    : 'Draft loaded (' + restoredItems.length + ' item(s))');
+            }
+
+            function buildOrderPostModel() {
+                return {
+                    productItems: self.productDetailsToPost(),
+                    storeID: self.storeSelectValue(),
+                    vendorNumber: self.vendorSelectValue(),
+                    productOrderID: self.draftOrderID()
+                };
+            }
+
+            function queueDraftSave() {
+                if (self.draftSaveTimer) {
+                    clearTimeout(self.draftSaveTimer);
+                }
+                if (self.productDetailsToPost().length < 1) {
+                    self.draftSaveStatus('');
+                    return;
+                }
+                self.draftSaveStatus('Saving draft…');
+                self.draftSaveTimer = window.setTimeout(saveDraftOrder, 5000);
+            }
+
+            function saveDraftOrder() {
+                self.draftSaveTimer = null;
+                if (self.productDetailsToPost().length < 1) {
+                    return;
+                }
+                self.draftSaveInProgress(true);
+                var apiURL = appControls.serviceURL('productorder/draft');
+                app.ajax('POST', apiURL, function(responseModel) {
+                    self.draftSaveInProgress(false);
+                    if (responseModel && responseModel.data && responseModel.data.productOrderID) {
+                        self.draftOrderID(responseModel.data.productOrderID);
+                        self.savedDraftSelectValue(responseModel.data.productOrderID);
+                        self.draftSaveStatus('Draft saved');
+                        self.loadSavedDrafts();
+                    } else {
+                        self.draftSaveStatus('Draft save failed');
+                    }
+                    if (self.pendingPlaceOrder) {
+                        self.pendingPlaceOrder = false;
+                        submitCommittedOrder();
+                    }
+                }, knockoutMap.toJSON(buildOrderPostModel()), 'JSON', 'application/json');
+            }
+
 
             /*Order qunatity update handler*/
             self.orderQuantityUpdateHandler = (event) => {
@@ -822,6 +1065,7 @@ define(['require', 'ojs/ojcore', 'knockout', 'knockout', 'ojs/ojrouter', 'appCon
                 // Remove 0 qty items to post.
                 self.productDetailsToPost(self.productDetailsToPost().filter(e => e.quantityOrdered !== 0));
                 buildOrderTotalValue();
+                queueDraftSave();
             };
 
             function buildOrderTotalValue() {
@@ -834,28 +1078,21 @@ define(['require', 'ojs/ojcore', 'knockout', 'knockout', 'ojs/ojrouter', 'appCon
                 self.orderTotalValue(sum.toFixed(2));
             }
 
-
-
-
-            self.placeOrderAction = (event) => {
-                self.showMessage(false);
-
+            function submitCommittedOrder() {
                 if (self.productDetailsToPost().length < 1) {
                     showMessages("error", "Select atleast one product to place order");
                     self.showMessage(true);
                     return;
                 }
 
-                var postModel = {};
                 self.disabledClass('kn-disabled');
-                postModel.productItems = self.productDetailsToPost();
-               // postModel.storeID = '1001'; //self.storeSelectValue();
-                 postModel.storeID = self.storeSelectValue();
-                postModel.vendorNumber = self.vendorSelectValue();
                 self.productOrderLoading(true);
                 var apiURL = appControls.serviceURL('productorder');
                 app.ajax("POST", apiURL, function(responseModel) {
                     self.disabledClass(null);
+                    if (responseModel && responseModel.data && responseModel.data.pdfBase64) {
+                        downloadOrderPdf(responseModel.data.pdfBase64, responseModel.data.productOrderID);
+                    }
                     showMessages("confirmation", "Order '" + responseModel.data.productOrderID + "' is placed" );
                     self.productOrderLoading(false);
                     self.showMessage(true);
@@ -865,6 +1102,10 @@ define(['require', 'ojs/ojcore', 'knockout', 'knockout', 'ojs/ojrouter', 'appCon
                     if (self.productTableRefreshTimer) {
                         clearTimeout(self.productTableRefreshTimer);
                     }
+	                 self.draftOrderID(null);
+	                 self.draftSaveStatus('');
+	                 self.savedDraftSelectValue(null);
+                     self.loadSavedDrafts();
                      resetProductTableToVendorItems();
                       var productTable = document.getElementById('producttableid');
                         if (productTable && typeof productTable.refresh === 'function') {
@@ -872,7 +1113,38 @@ define(['require', 'ojs/ojcore', 'knockout', 'knockout', 'ojs/ojrouter', 'appCon
                         }
                     // Allow the confirmation message to stay visible before refreshing the table.
                     
-                }, knockoutMap.toJSON(postModel), 'JSON', 'application/json');
+                }, knockoutMap.toJSON(buildOrderPostModel()), 'JSON', 'application/json');
+            }
+
+            function downloadOrderPdf(pdfBase64, orderID) {
+                var binary = window.atob(pdfBase64);
+                var bytes = new Uint8Array(binary.length);
+                for (var i = 0; i < binary.length; i++) {
+                    bytes[i] = binary.charCodeAt(i);
+                }
+                var pdfBlob = new Blob([bytes], { type: 'application/pdf' });
+                var downloadUrl = window.URL.createObjectURL(pdfBlob);
+                var link = document.createElement('a');
+                link.href = downloadUrl;
+                link.download = 'ProductOrder-' + orderID + '.pdf';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.setTimeout(function() { window.URL.revokeObjectURL(downloadUrl); }, 1000);
+            }
+
+            self.placeOrderAction = (event) => {
+                self.showMessage(false);
+                if (self.draftSaveTimer) {
+                    clearTimeout(self.draftSaveTimer);
+                    self.draftSaveTimer = null;
+                }
+                if (self.draftSaveInProgress()) {
+                    self.pendingPlaceOrder = true;
+                    self.draftSaveStatus('Saving draft before placing order…');
+                    return;
+                }
+                submitCommittedOrder();
             };
 
 

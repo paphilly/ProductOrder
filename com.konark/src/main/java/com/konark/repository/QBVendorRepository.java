@@ -14,4 +14,3 @@ public interface QBVendorRepository extends CrudRepository<QBVendorEntity, Strin
 	List<String> findAccountsPayableVendorEmailID(@Param("vendorReferenceID") String vendorReferenceID);
 	
 }
-

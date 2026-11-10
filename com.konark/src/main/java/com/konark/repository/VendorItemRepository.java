@@ -138,14 +138,14 @@ List<VendorInventoryProjection> findItemsByVendorNumber( @Param("vendorNumber") 
 	@Query(
 		    value = """
             WITH productLink AS (
-                SELECT link.ItemNum, link.Store_ID, link.Vendor_Number,
+                SELECT DISTINCT link.ItemNum, link.Store_ID, link.Vendor_Number,
                        link.CostPer, link.Case_Cost, link.NumPerVenCase,
                        link.Vendor_Part_Num
                 FROM vw_AllInventoryVendors link
                 WHERE link.Store_ID = :storeId
                   AND link.Vendor_Number = :vendorNumber
                 UNION ALL
-                SELECT ref.ItemNum, ref.Store_ID, ref.Vendor_Number,
+                SELECT DISTINCT ref.ItemNum, ref.Store_ID, ref.Vendor_Number,
                        ref.CostPer, ref.Case_Cost, ref.NumPerVenCase,
                        ref.Vendor_Part_Num
                 FROM vw_AllInventoryVendors ref
@@ -158,6 +158,12 @@ List<VendorInventoryProjection> findItemsByVendorNumber( @Param("vendorNumber") 
                         AND (localLink.ItemNum = ref.ItemNum
                              OR localLink.Vendor_Part_Num = ref.Vendor_Part_Num)
                   )
+            ),
+            localLink AS (
+                SELECT DISTINCT ItemNum, Vendor_Number
+                FROM vw_AllInventoryVendors
+                WHERE Store_ID = :storeId
+                  AND Vendor_Number = :vendorNumber
             )
             SELECT
                 vendor.Company AS vendorName,
@@ -167,16 +173,20 @@ List<VendorInventoryProjection> findItemsByVendorNumber( @Param("vendorNumber") 
                 CONVERT(nvarchar(50), COALESCE(NULLIF(link.CostPer, 0), inventory.Cost, 0)) AS costPer,
                 CONVERT(nvarchar(50), COALESCE(NULLIF(link.Case_Cost, 0), NULLIF(link.CostPer, 0), inventory.Cost, 0)) AS caseCost,
                 CONVERT(nvarchar(50), link.NumPerVenCase) AS numPerVenCase,
-                link.Vendor_Part_Num AS vendorPartNum,
+                COALESCE(
+                    NULLIF(LTRIM(RTRIM(link.Vendor_Part_Num)), ''),
+                    NULLIF(LTRIM(RTRIM(inventory.Vendor_Part_Num)), ''),
+                    NULLIF(LTRIM(RTRIM(referenceInventory.Vendor_Part_Num)), ''),
+                    ''
+                ) AS vendorPartNum,
                 COALESCE(inventory.ItemName, referenceInventory.ItemName) AS itemName,
                 NULL AS category,
-                CONVERT(nvarchar(50), CASE WHEN inventory.In_Stock < 0 THEN 0 ELSE inventory.In_Stock END) AS inStock,
+                CONVERT(nvarchar(50), inventory.In_Stock) AS inStock,
                 COALESCE(inventory.Dept_ID, referenceInventory.Dept_ID) AS deptId,
                 CAST(COALESCE(department.Description, referenceDepartment.Description) AS nvarchar(255)) AS description
             FROM productLink link
-            LEFT JOIN vw_AllInventoryVendors localLink
+            LEFT JOIN localLink
               ON localLink.ItemNum = link.ItemNum
-             AND localLink.Store_ID = :storeId
              AND localLink.Vendor_Number = :vendorNumber
             LEFT JOIN vw_AllInventory inventory
               ON localLink.ItemNum IS NOT NULL

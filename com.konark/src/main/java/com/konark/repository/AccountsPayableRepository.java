@@ -31,4 +31,3 @@ public interface AccountsPayableRepository extends CrudRepository<BillPayEntity,
 	@Query(value = "SELECT DISTINCT CAST(SalesTermRefName AS NVARCHAR(255)) FROM Bill b WHERE SalesTermRefName IS NOT NULL", nativeQuery = true)
 	List<String> findDistinctLocation();
 }
-
