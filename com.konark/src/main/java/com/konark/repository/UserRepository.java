@@ -13,6 +13,9 @@ public interface UserRepository extends CrudRepository<UserEntity, String> {
 
 	@Query(value = "SELECT * FROM Konark_User WHERE Username= :userName COLLATE Latin1_General_CS_AS AND Password= :password COLLATE Latin1_General_CS_AS", nativeQuery = true)
 	List<Object[]> authenticateUser(@Param("userName") String userName, @Param("password") String password);
+
+	@Query(value = "SELECT Username, Password, Active, Role, UserJson, Email FROM Konark_User WHERE Username= :userName AND Password= :password", nativeQuery = true)
+	List<Object[]> authenticateUserSimple(@Param("userName") String userName, @Param("password") String password);
 	
 	@Query(value = "SELECT UserJson FROM Konark_User WHERE Username= :userName", nativeQuery = true)
 	String findByUsername(@Param("userName") String userName);

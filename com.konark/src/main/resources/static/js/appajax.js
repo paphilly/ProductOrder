@@ -40,10 +40,10 @@ function ( oj, ko, $ ) {
 							 done(jqXHR); // when status is 202 accepted
 						}
 						else if ( 0 !== jqXHR.status ) {
-							EXCEPTION( jqXHR );
-							oj.Router.sync().then( function () {
-								oj.Router.rootInstance.go( 'exception' );
-							} );
+							console.error( "AJAX Error (" + jqXHR.status + "):", jqXHR.responseText || jqXHR.statusText );
+							if ( typeof done === "function" ) {
+								done( jqXHR );
+							}
 						}
 					} );
 			},

@@ -32,6 +32,7 @@
                         <div class=" oj-flex-item oj-sm-12 oj-md-2 oj-lg-2 oj-sm-padding-2x-start oj-sm-padding-2x-top oj-sm-padding-2x-end">
                             <div class=" oj-sm-padding-1x-bottom  oj-typography-semi-bold" style="">Order Total :   </div>
                             <span style=" color : green;font-size: 1.5em;font-weight: 600;"  data-bind="text: '$' + orderTotalValue()"></span>
+	                        <div style="font-size: 0.8em; color: #5f6f16; margin-top: 4px;" data-bind="text: draftSaveStatus"></div>
                         </div>
                     </oj-bind-if>
                 </div>
@@ -44,6 +45,17 @@
                                           placeholder="Select a Vendor from the list..."
                                           on-oj-value-action="[[vendorValueActionHandler]]"
                                           value="{{vendorSelectValue}}"
+                                          style="max-width: 26em;">
+                        </oj-select-single>
+                    </div>
+                    <div class=" oj-flex-item oj-sm-12 oj-md-4 oj-lg-4 oj-sm-padding-2x-start oj-sm-padding-2x-top oj-sm-padding-2x-end">
+                        <div class="oj-sm-padding-1x-bottom oj-typography-semi-bold">Saved Drafts</div>
+                        <oj-select-single id="saved-drafts"
+                                          class="kn-dropdown-icon-color"
+                                          data="[[draftDP]]"
+                                          placeholder="Open a saved draft..."
+                                          on-oj-value-action="[[savedDraftValueActionHandler]]"
+                                          value="{{savedDraftSelectValue}}"
                                           style="max-width: 26em;">
                         </oj-select-single>
                     </div>
@@ -99,11 +111,12 @@
                         </div>
                         <div class="oj-flex-item oj-sm-12 oj-md-8 oj-lg-8 oj-sm-padding-2x-start oj-sm-padding-2x-top oj-sm-padding-2x-end">
                             <div class = "oj-sm-padding-2x-top">
-                                <div class="oj-sm-padding-1x-bottom  oj-typography-semi-bold">Sarch</div>
+                                <div class="oj-sm-padding-1x-bottom  oj-typography-semi-bold">Search</div>
                                 <oj-input-search id="productsearchid"
                                                  value="{{searchValue}}"
                                                  raw-value="{{searchRawValue}}"
                                                  suggestions="[[searchSuggestionsDP]]"
+                                                 on-raw-value-changed="[[handleProductSearchRawValueChanged]]"
                                                  on-oj-value-action="[[handleSearchValueAction]]"
                                                  placeholder="Type Product to filter"
                                                   >
@@ -121,7 +134,7 @@
                                 </div>
                             </oj-bind-if>
                             <div class="oj-sm-padding-1x-bottom  oj-typography-semi-bold" style="float: right;padding-right: 10px;">Total Products :
-                            <oj-bind-text value="[[productTableDataprovider.dataProvider.data.length]]"></oj-bind-text>
+                            <oj-bind-text value="[[productCount]]"></oj-bind-text>
                             </div>
                             <div :class="[[disabledClass]]">
                                 <oj-table id='producttableid' aria-label=' Table'
@@ -139,7 +152,7 @@
 
                                             </td>
                                             <td data-bind="click: function (data) { productTableSelectionListener(row.data.itemNumber) } ">
-                                                <oj-bind-text value="[[row.data.vendorPartNumber]]"></oj-bind-text>
+                                                <oj-bind-text value="[[row.data.vendorPartNumber || '—']]"></oj-bind-text>
                                             </td>
                                             <td data-bind="click: function (data) { productTableSelectionListener(row.data.itemNumber) } ">
                                                 <oj-bind-text value="[[row.data.itemNumber]]"></oj-bind-text>
@@ -165,7 +178,7 @@
                                             </td>
                                             <oj-bind-if test="[[storeInventorySwitchValue()]]">
                                                 <td style="text-align: center;"  data-bind="click: function (data) { productTableSelectionListener(row.data.itemNumber) }">
-                                                    <oj-bind-text value="[[row.data.quantityInStock]]"></oj-bind-text>
+                                                    <oj-bind-text value="[[row.data.quantityInStock == null ? 0 : row.data.quantityInStock]]"></oj-bind-text>
                                                 </td>
                                             </oj-bind-if>
                                         </tr>
@@ -204,7 +217,7 @@
                             <img class="product-loading-img" style="width: 5em;" src="./css/images/loading.gif"/>
                         </oj-bind-if>
                         <oj-bind-if test="[[showVendorReferenceTable() ]]">
-                            <oj-table id='product-table' aria-label='Vendor Reference Table'
+                            <oj-table id='vendor-reference-table' aria-label='Vendor Reference Table'
                                       class="oj-sm-width-full oj-bg-brand-20"
                                       data='[[vendorReferenceTableDataProvider]]'
                                       selection-mode='{"row": "single"}'
@@ -327,6 +340,7 @@
                                                  min-length="2"
                                                  raw-value="{{inventorySearchRawValue}}"
                                                  on-oj-value-action="[[handleInventorySearchValueAction]]"
+                                                 on-raw-value-changed="[[handleInventorySearchRawValueChanged]]"
                                                  placeholder="type product for inventory check..."
                                                  aria-label="type product for inventory check..."
                                                  style="width: 53em;">
@@ -337,7 +351,7 @@
 
                     <div class="oj-flex-item oj-sm-12 oj-md-12 oj-lg-12 oj-sm-padding-2x-start oj-sm-padding-2x-top oj-sm-padding-2x-end">
                         <oj-bind-if test="[[showInventoryTable() ]]">
-                            <oj-table id='product-table' aria-label='Vendor Reference Table'
+                            <oj-table id='inventory-table' aria-label='Store Inventory Table'
                                       class="oj-sm-width-full oj-bg-brand-10"
                                       data='[[inventoryTableDataProvider]]'
                                       selection-mode='{"row": "single"}'
@@ -346,12 +360,16 @@
                                       edit-mode='rowEdit'
                                       style='width: 99%; max-height : 250px'
                                       columns='[           {"headerText": "Item Name",
-                        "field": "ItemName",
+                        "field": "itemName",
+                        "sortProperty": "itemName",
+                        "sortable": "enabled",
                         "resizable": "enabled",
                         "headerClassName": "  kn-table-header-class",
                         "headerStyle": "color : black;font-size: 1em;font-weight: 600;"},
                         {"headerText": "Inventory",
-                        "field": "Inventory",
+                        "field": "quantityInStock",
+                        "sortProperty": "quantityInStock",
+                        "sortable": "enabled",
                         "resizable": "enabled",
                         "headerClassName": "  kn-table-header-class",
                         "headerStyle": "color : black;font-size: 1em;font-weight: 600; text-align: center;"}]'>
@@ -361,7 +379,7 @@
                                             <oj-bind-text value="[[row.data.itemName]]"></oj-bind-text>
                                         </td>
                                         <td style="text-align: center;" >
-                                            <oj-bind-text value="[[row.data.quantityInStock]]"></oj-bind-text>
+                                            <oj-bind-text value="[[row.data.quantityInStock == null ? 0 : row.data.quantityInStock]]"></oj-bind-text>
                                         </td>
                                     </tr>
                                 </template>

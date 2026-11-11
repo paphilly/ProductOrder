@@ -53,19 +53,26 @@ public class LoginController {
 
 	@PostMapping(value = "/login", consumes = "application/json")
 	public ResponseEntity<ResponseModel> login(@RequestBody UserModel userModel) {
-
-		userModel = userService.findUser(userModel);
 		ResponseModel responseModel = new ResponseModel();
-		if (userModel != null) {
-			String token = jwtUtil.generateToken(userModel);
-			responseModel.getData().put("token", token);
-			responseModel.setMessage("Login Success");
-			// Removed userModel from response as per requirement
-			return ResponseEntity.ok(responseModel);
-		}
-		responseModel.setMessage("Invalid Username or Password");
-		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseModel);
+		try {
+			if (userModel == null || userModel.getUsername() == null || userModel.getPassword() == null) {
+				responseModel.setMessage("Username and password are required");
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseModel);
+			}
 
+			UserModel foundUser = userService.findUser(userModel);
+			if (foundUser != null) {
+				String token = jwtUtil.generateToken(foundUser);
+				responseModel.getData().put("token", token);
+				responseModel.setMessage("Login Success");
+				return ResponseEntity.ok(responseModel);
+			}
+			responseModel.setMessage("Invalid Username or Password");
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseModel);
+		} catch (Exception e) {
+			responseModel.setMessage("Login failed: " + e.getMessage());
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseModel);
+		}
 	}
 
 	@org.springframework.web.bind.annotation.GetMapping("/user/details")

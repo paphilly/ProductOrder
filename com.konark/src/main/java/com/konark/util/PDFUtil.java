@@ -1,8 +1,7 @@
 package com.konark.util;
 
-import java.io.FileOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Base64;
@@ -26,17 +25,18 @@ import com.lowagie.text.DocumentException;
 public class PDFUtil {
 
 	public static void generatePdfFromHtml(String html, String filename) throws IOException, DocumentException {
-		
-	//	String outputFolder = "D:\\" + filename + ".pdf";
-		String outputFolder = filename + ".pdf";
-		OutputStream outputStream = new FileOutputStream(outputFolder);
+		byte[] pdfBytes = generatePdfBytesFromHtml(html);
+		java.nio.file.Files.write(java.nio.file.Paths.get(filename + ".pdf"), pdfBytes);
+	}
 
+	public static byte[] generatePdfBytesFromHtml(String html) throws IOException, DocumentException {
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		ITextRenderer renderer = new ITextRenderer();
 		renderer.setDocumentFromString(html);
 		renderer.layout();
 		renderer.createPDF(outputStream);
-
-		outputStream.close();
+		outputStream.flush();
+		return outputStream.toByteArray();
 	}
 
 	public static String parseProductOrderTemplate(ProductOrderModel productOrderModel, StoreEntity store, VendorEntity vendor, Date orderDate, BigDecimal totalCost) {

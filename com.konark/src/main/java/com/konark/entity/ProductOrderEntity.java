@@ -26,7 +26,7 @@ public class ProductOrderEntity {
 	
 	
 
-    @OneToMany(mappedBy = "productOrderEntity", fetch = FetchType.LAZY,  cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "productOrderEntity", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<ProductOrderItemEntity> productOrderItems = new ArrayList<>();
 
 	@Id
@@ -54,6 +54,12 @@ public class ProductOrderEntity {
 	@Column(name = "TotalCost")
 	private BigDecimal totalCost;
 
+	@Column(name = "OrderStatus")
+	private String orderStatus;
+
+	@Column(name = "CreatedBy")
+	private String createdBy;
+
 //	public String getOrderID() {
 //		return OrderID;
 //	}
@@ -68,6 +74,22 @@ public class ProductOrderEntity {
 
 	public void setTotalCost(BigDecimal totalCost) {
 		this.totalCost = totalCost;
+	}
+
+	public String getOrderStatus() {
+		return orderStatus;
+	}
+
+	public void setOrderStatus(String orderStatus) {
+		this.orderStatus = orderStatus;
+	}
+
+	public String getCreatedBy() {
+		return createdBy;
+	}
+
+	public void setCreatedBy(String createdBy) {
+		this.createdBy = createdBy;
 	}
 
 	public String getVendorNumber() {

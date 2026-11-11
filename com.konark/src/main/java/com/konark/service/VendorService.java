@@ -29,4 +29,16 @@ public class VendorService {
 		vendorModel.setVendors(vendorsList);
 		return vendorModel;
 	}
+
+	public VendorModel getVendorsByStoreID(String storeID) {
+		if (storeID == null || storeID.trim().isEmpty() || "ALL".equalsIgnoreCase(storeID.trim()) || "0".equals(storeID.trim())) {
+			return getAllVendors();
+		}
+		List<VendorEntity> storeVendors = vendorRepository.findByStoreID(storeID.trim());
+		if (storeVendors == null) {
+			storeVendors = new ArrayList<VendorEntity>();
+		}
+		vendorModel.setVendors(storeVendors);
+		return vendorModel;
+	}
 }

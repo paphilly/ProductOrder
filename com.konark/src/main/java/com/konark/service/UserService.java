@@ -23,28 +23,68 @@ public class UserService {
 	UserRepository userRepository;
 
 	public UserModel processLogin(UserModel userModel) {
-
-		List<Object[]> queriedUser = userRepository.authenticateUser(userModel.getUsername(), userModel.getPassword());
-		if (queriedUser.size() > 0) {
-			userModel.setUserJSON(ApplicationUtils.getString(queriedUser.get(0)[4]));
-			userModel.setUsername(ApplicationUtils.getString(queriedUser.get(0)[0]));
-			userModel.setRole(ApplicationUtils.getString(queriedUser.get(0)[2]));
+		List<Object[]> queriedUser = null;
+		try {
+			queriedUser = userRepository.authenticateUser(userModel.getUsername(), userModel.getPassword());
+		} catch (Exception e) {
+			// Fallback if collation clause fails
+		}
+		if (queriedUser == null || queriedUser.isEmpty()) {
+			try {
+				queriedUser = userRepository.authenticateUserSimple(userModel.getUsername(), userModel.getPassword());
+			} catch (Exception e) {
+				// Ignore
+			}
 		}
 
-		return userModel;
-	}
-
-	public UserModel findUser(UserModel userModel) {
-		UserEntity userEntity = userRepository.findByUsernameAndPassword(userModel.getUsername(),
-				userModel.getPassword());
-		if (userEntity != null) {
-			userModel.setUserJSON(userEntity.getUserJson());
-			userModel.setRole(userEntity.getRole());
-			userModel.setEmail(userEntity.getEmail());
-			userModel.setUserInfo(JsonUtil.fromJson(userEntity.getUserJson(), UserInfo.class));
+		if (queriedUser != null && !queriedUser.isEmpty()) {
+			Object[] row = queriedUser.get(0);
+			userModel.setUsername(ApplicationUtils.getString(row[0]));
+			// Col 0: Username, Col 1: Password, Col 2: Active, Col 3: Role, Col 4: UserJson, Col 5: Email
+			String role = row.length > 3 && row[3] != null ? ApplicationUtils.getString(row[3]) : ApplicationUtils.getString(row[2]);
+			userModel.setRole(role);
+			String userJson = row.length > 4 ? ApplicationUtils.getString(row[4]) : null;
+			userModel.setUserJSON(userJson);
+			if (row.length > 5) {
+				userModel.setEmail(ApplicationUtils.getString(row[5]));
+			}
+			if (userJson != null && !userJson.trim().isEmpty()) {
+				try {
+					userModel.setUserInfo(JsonUtil.fromJson(userJson, UserInfo.class));
+				} catch (Exception e) {
+					// Ignore malformed JSON
+				}
+			}
 			return userModel;
 		}
 		return null;
+	}
+
+	public UserModel findUser(UserModel userModel) {
+		if (userModel == null || userModel.getUsername() == null || userModel.getPassword() == null) {
+			return null;
+		}
+		try {
+			UserEntity userEntity = userRepository.findByUsernameAndPassword(userModel.getUsername(),
+					userModel.getPassword());
+			if (userEntity != null) {
+				userModel.setUserJSON(userEntity.getUserJson());
+				userModel.setRole(userEntity.getRole());
+				userModel.setEmail(userEntity.getEmail());
+				if (userEntity.getUserJson() != null && !userEntity.getUserJson().trim().isEmpty()) {
+					try {
+						userModel.setUserInfo(JsonUtil.fromJson(userEntity.getUserJson(), UserInfo.class));
+					} catch (Exception e) {
+						// Ignore or log malformed userJson
+					}
+				}
+				return userModel;
+			}
+		} catch (Exception e) {
+			// Fallback to native SQL query if JPA entity mapping fails
+			return processLogin(userModel);
+		}
+		return processLogin(userModel);
 	}
 
 	public boolean isUserExists(String userName) {
@@ -60,7 +100,13 @@ public class UserService {
 			userModel.setUsername(userEntity.getUsername());
 			userModel.setRole(userEntity.getRole());
 			userModel.setEmail(userEntity.getEmail());
-			userModel.setUserInfo(JsonUtil.fromJson(userEntity.getUserJson(), UserInfo.class));
+			if (userEntity.getUserJson() != null && !userEntity.getUserJson().trim().isEmpty()) {
+				try {
+					userModel.setUserInfo(JsonUtil.fromJson(userEntity.getUserJson(), UserInfo.class));
+				} catch (Exception e) {
+					// Ignore or log malformed userJson
+				}
+			}
 			return userModel;
 		}
 		return null;

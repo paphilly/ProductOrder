@@ -417,3 +417,6 @@ border-radius: 20px !important;
     font-weight: normal;
     font-style: normal;
 }
+#productsearchid .oj-inputsearch-autocomplete-floating-container {
+  display: none;
+}

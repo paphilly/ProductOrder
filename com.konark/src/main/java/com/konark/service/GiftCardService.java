@@ -60,7 +60,7 @@ public class GiftCardService {
 				Integer transaction = (Integer) transactionRows.get(i)[1];
 				String trxType = transaction.toString();
 				String transType = null;
-				 if(trxType == "0") {
+				 if("0".equals(trxType)) {
                      transType = "Load";
                  } else {
                 	 transType = "Redeem";

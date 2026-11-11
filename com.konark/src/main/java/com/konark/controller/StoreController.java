@@ -25,38 +25,27 @@ public class StoreController {
 	@Autowired
 	StoreService storeService;
 	
-	@GetMapping("")
-	private ResponseEntity<ResponseModel> getAllStores() {
+	@GetMapping({"", "/"})
+	public ResponseEntity<ResponseModel> getAllStores() {
 		
 		ResponseModel responseModel = new ResponseModel();
 		Map<String,String> stores = new HashMap<String, String>();
 		
 		List<StoreEntity> storeEntities = storeService.getAllStores();
 
-		
-
-//		stores.put("Aurora", "7890");
-//		stores.put("Charlotte", "8901");
-//		stores.put("Denver", "5678");
-//		stores.put("Desmoines", "3456");
-//		stores.put("Maple", "4567");
-//		stores.put("Namaste", "2345");
-//		stores.put("Omaha", "1234");
-//		stores.put("Parker", "6789");
-//		stores.put("StLouis", "9012");
-
-		stores.put("Aurora", "9999");
-		stores.put("Charlotte", "9999");
-		stores.put("Denver", "9999");
-		stores.put("Desmoines", "3456");
-		stores.put("Maple", "4567");
-		stores.put("Namaste", "2345");
-		stores.put("Omaha", "9999");
-		stores.put("Parker", "6789");
-		stores.put("StLouis", "9012");
+		// Central.dbo.Store is the source of truth. Keep Maple as a compatibility
+		// entry for deployments whose Store row has not been populated yet.
+		for (StoreEntity storeEntity : storeEntities) {
+			if (storeEntity.getStoreName() != null && storeEntity.getStoreID() != null) {
+				stores.put(storeEntity.getStoreName(), storeEntity.getStoreID());
+			}
+		}
+		stores.putIfAbsent("Maple", "4567");
+		// The physical source database is Charlotte; this is the North Carolina
+		// store identifier used by the order application.
+		stores.putIfAbsent("North Carolina", "8901");
 
 		responseModel.addModel("Stores", stores);
 		return ApplicationUtils.buildOkResponse(responseModel);
 	}
 }
-

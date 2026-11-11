@@ -30,6 +30,14 @@ public class InventoryController {
 		responseModel.addModel(InventoryModel.class.getSimpleName(), inventoryModel);
 		return ApplicationUtils.buildOkResponse(responseModel);
 	}
+
+	@GetMapping("/store")
+	private ResponseEntity<ResponseModel> getStoreInventory(@RequestParam("storeID") String storeID) {
+		ResponseModel responseModel = new ResponseModel();
+		InventoryModel inventoryModel = inventoryService.getStoreInventory(storeID);
+		responseModel.addModel(InventoryModel.class.getSimpleName(), inventoryModel);
+		return ApplicationUtils.buildOkResponse(responseModel);
+	}
 	
 	@GetMapping("/product")
 	private ResponseEntity<ResponseModel> getStoreInventoryByItemName(@RequestParam("productName") String productName, @RequestParam("storeID") String storeID) {

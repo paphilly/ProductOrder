@@ -17,6 +17,7 @@ public class ProductOrderModel {
 	private String storeID;
 	
 	private String productOrderID;
+	private String pdfBase64;
 
 	public List<ProductItemModel> getProductItems() {
 		return productItems;
@@ -48,5 +49,13 @@ public class ProductOrderModel {
 
 	public void setProductOrderID(String productOrderID) {
 		this.productOrderID = productOrderID;
+	}
+
+	public String getPdfBase64() {
+		return pdfBase64;
+	}
+
+	public void setPdfBase64(String pdfBase64) {
+		this.pdfBase64 = pdfBase64;
 	}
 }

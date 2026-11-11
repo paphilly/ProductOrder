@@ -40,22 +40,24 @@ public class SalesHistoryController {
 		DecimalFormat df = new DecimalFormat("#0.00");
 		Map<String, String> itemSaleHistory = new HashMap<String, String>();
 
-		if (sales != null & sales.size() > 0) {
+		if (sales != null && !sales.isEmpty()) {
 			Object[] salesColumns = sales.get(0);
+			try (java.io.FileWriter fw = new java.io.FileWriter("C:/ProductOrder/sales_columns.log", true)) {
+				fw.write("salesColumns len=" + salesColumns.length + " content=" + java.util.Arrays.toString(salesColumns) + "\n");
+			} catch (Exception ignored) {}
 
-		//	Strng itemNum = (String) salesColumns[0];
 			String itemName = (String) salesColumns[1];
 			BigDecimal seven = new BigDecimal(0.00);
 			BigDecimal fifteen = new BigDecimal(0.00);
 			BigDecimal thirty = new BigDecimal(0.00);
-			if(salesColumns[2]!=null) {
-				seven = (BigDecimal) salesColumns[2];
+			if (salesColumns[2] != null) {
+				seven = new BigDecimal(salesColumns[2].toString());
 			}
-			if(salesColumns[3]!=null) {
-				fifteen = (BigDecimal) salesColumns[3];
+			if (salesColumns[3] != null) {
+				fifteen = new BigDecimal(salesColumns[3].toString());
 			}
-			if(salesColumns[4]!=null) {
-				thirty = (BigDecimal) salesColumns[4];
+			if (salesColumns[4] != null) {
+				thirty = new BigDecimal(salesColumns[4].toString());
 			}
 //			String sevenDay = (salesColumns[2]).toString();
 //			String fifteenDay = (salesColumns[3]).toString();

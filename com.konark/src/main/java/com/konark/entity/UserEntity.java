@@ -69,7 +69,7 @@ public class UserEntity {
 	}
 
 	public void setEmail(String email) {
-		 username = email;
+		 this.email = email;
 	}
 	public String getEmail() {
 		return email;
